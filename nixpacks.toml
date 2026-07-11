@@ -8,4 +8,4 @@ cmds = ["npm install", "npm rebuild better-sqlite3", "cd backend && npm install 
 cmds = ["cd backend && npm run build"]
 
 [phases.start]
-cmd = "mkdir -p /tmp/data && cd backend && node dist/server.cjs"
+cmd = "mkdir -p /tmp/data && cd backend && node dist/server.mjs"

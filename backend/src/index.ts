@@ -27,9 +27,6 @@ process.on('unhandledRejection', (reason) => {
   console.error('UNHANDLED REJECTION:', reason);
 });
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 try {
   const dbDir = path.dirname(env.DATABASE_PATH);
   if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
@@ -78,7 +75,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/audit-logs', auditRoutes);
 
 if (env.NODE_ENV === 'production') {
-  const distPath = path.resolve(__dirname, '../../frontend/dist');
+  const distPath = path.resolve(process.cwd(), '../frontend/dist');
   if (fs.existsSync(distPath)) {
     app.use(express.static(distPath));
     app.get('*', (_req, res) => { res.sendFile(path.join(distPath, 'index.html')); });

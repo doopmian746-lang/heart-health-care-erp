@@ -6,7 +6,7 @@
     "watchPatterns": ["backend/**"]
   },
   "deploy": {
-    "startCommand": "mkdir -p /tmp/data && cd backend && node dist/server.cjs",
+    "startCommand": "mkdir -p /tmp/data && cd backend && node dist/server.mjs",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
