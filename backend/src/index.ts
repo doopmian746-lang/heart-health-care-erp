@@ -3,10 +3,39 @@ import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { env } from './config/env.js';
-import { initializeDatabase } from './config/database.js';
-import { seedDatabase } from './config/seed.js';
+
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err.message);
+  console.error(err.stack);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('UNHANDLED REJECTION:', reason);
+});
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const dbDir = path.dirname(env.DATABASE_PATH);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+console.log(`Database path: ${env.DATABASE_PATH}`);
+console.log(`Database dir exists: ${fs.existsSync(dbDir)}`);
+
+try {
+  const { initializeDatabase } = await import('./config/database.js');
+  const { seedDatabase } = await import('./config/seed.js');
+  initializeDatabase();
+  seedDatabase();
+} catch (err: any) {
+  console.error('DATABASE INIT FAILED:', err.message);
+  console.error(err.stack);
+  process.exit(1);
+}
 
 import authRoutes from './routes/auth.routes.js';
 import patientRoutes from './routes/patient.routes.js';
@@ -18,12 +47,6 @@ import donorRoutes from './routes/donor.routes.js';
 import fileRequestRoutes from './routes/file-request.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import auditRoutes from './routes/audit.routes.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-initializeDatabase();
-seedDatabase();
 
 const app = express();
 
@@ -41,7 +64,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: env.FRONTEND_URL,
+  origin: env.FRONTEND_URL === '*' ? true : env.FRONTEND_URL,
   credentials: true,
 }));
 
@@ -76,10 +99,16 @@ app.use('/api/audit-logs', auditRoutes);
 
 if (env.NODE_ENV === 'production') {
   const distPath = path.resolve(__dirname, '../../frontend/dist');
-  app.use(express.static(distPath));
-  app.get('*', (_req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
+  if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+  } else {
+    app.get('/', (_req, res) => {
+      res.json({ status: 'ok', message: 'Heart Health Care Foundation ERP API', version: '1.0.0' });
+    });
+  }
 }
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -87,9 +116,14 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
-app.listen(env.PORT, '0.0.0.0', () => {
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+const PORT = env.PORT;
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n  Heart Health Care Foundation ERP`);
-  console.log(`  Server running on http://localhost:${env.PORT}`);
+  console.log(`  Server running on http://0.0.0.0:${PORT}`);
   console.log(`  Environment: ${env.NODE_ENV}\n`);
 });
 
