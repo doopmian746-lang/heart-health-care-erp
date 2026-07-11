@@ -55,7 +55,11 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: env.FRONTEND_URL === '*' ? true : env.FRONTEND_URL,
+  origin: [
+    'https://heart-health-care-erp.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000',
+  ],
   credentials: true,
 }));
 
