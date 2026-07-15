@@ -12,7 +12,8 @@ interface UseApiResult<T> {
 
 function resolveUrl(url: string): string {
   if (url.startsWith('http')) return url;
-  return `${API_BASE}${url.startsWith('/') ? url : `/${url}`}`;
+  const cleanUrl = url.startsWith('/api') ? url.slice(4) : url;
+  return `${API_BASE}${cleanUrl.startsWith('/') ? cleanUrl : `/${cleanUrl}`}`;
 }
 
 export function useApi<T>(url: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE' = 'GET'): UseApiResult<T> {
