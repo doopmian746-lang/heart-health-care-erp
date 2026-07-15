@@ -34,6 +34,7 @@ export default function PatientSocioEconomicForm({ data, onChange, readOnly }: P
             <option value="Shelter">Shelter</option>
             <option value="Other">Other</option>
           </select>
+          <p className="text-[10px] text-slate-400 mt-1">Current housing arrangement</p>
         </div>
         <div>
           <label className={labelClass}>House Type</label>
@@ -44,14 +45,17 @@ export default function PatientSocioEconomicForm({ data, onChange, readOnly }: P
             <option value="Katchi Abadi">Katchi Abadi</option>
             <option value="Other">Other</option>
           </select>
+          <p className="text-[10px] text-slate-400 mt-1">Type of dwelling unit</p>
         </div>
         <div>
-          <label className={labelClass}>Number of Rooms</label>
-          <input type="number" min="0" className={inputClass} value={data.numberOfRooms} onChange={e => update('numberOfRooms', parseInt(e.target.value) || 0)} disabled={readOnly} />
+          <label className={labelClass}>Number of Rooms *</label>
+          <input type="number" min="0" required className={inputClass} value={data.numberOfRooms || ''} onChange={e => update('numberOfRooms', parseInt(e.target.value) || 0)} disabled={readOnly} />
+          <p className="text-[10px] text-slate-400 mt-1">Total rooms in the house</p>
         </div>
         <div>
           <label className={labelClass}>Monthly Rent (PKR)</label>
-          <input type="number" min="0" step="100" className={inputClass} value={data.monthlyRent} onChange={e => update('monthlyRent', parseFloat(e.target.value) || 0)} disabled={readOnly} />
+          <input type="number" min="0" step="100" className={inputClass} value={data.monthlyRent || ''} onChange={e => update('monthlyRent', parseFloat(e.target.value) || 0)} disabled={readOnly} />
+          <p className="text-[10px] text-slate-400 mt-1">0 if owned or free housing</p>
         </div>
         <div className={fieldRow}>
           <div className="flex-1">
@@ -112,16 +116,19 @@ export default function PatientSocioEconomicForm({ data, onChange, readOnly }: P
         <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Household Economics</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className={labelClass}>Monthly Household Income (PKR)</label>
-            <input type="number" min="0" className={inputClass} value={data.monthlyHouseholdIncome} onChange={e => update('monthlyHouseholdIncome', parseFloat(e.target.value) || 0)} disabled={readOnly} />
+            <label className={labelClass}>Monthly Household Income (PKR) *</label>
+            <input type="number" min="0" required className={inputClass} value={data.monthlyHouseholdIncome || ''} onChange={e => update('monthlyHouseholdIncome', parseFloat(e.target.value) || 0)} disabled={readOnly} />
+            <p className="text-[10px] text-slate-400 mt-1">Combined income of all earners</p>
           </div>
           <div>
-            <label className={labelClass}>Number of Dependents</label>
-            <input type="number" min="0" className={inputClass} value={data.numberOfDependents} onChange={e => update('numberOfDependents', parseInt(e.target.value) || 0)} disabled={readOnly} />
+            <label className={labelClass}>Number of Dependents *</label>
+            <input type="number" min="0" required className={inputClass} value={data.numberOfDependents || ''} onChange={e => update('numberOfDependents', parseInt(e.target.value) || 0)} disabled={readOnly} />
+            <p className="text-[10px] text-slate-400 mt-1">Non-earning family members</p>
           </div>
           <div>
-            <label className={labelClass}>Earning Members</label>
-            <input type="number" min="0" className={inputClass} value={data.numberOfEarningMembers} onChange={e => update('numberOfEarningMembers', parseInt(e.target.value) || 0)} disabled={readOnly} />
+            <label className={labelClass}>Earning Members *</label>
+            <input type="number" min="0" required className={inputClass} value={data.numberOfEarningMembers || ''} onChange={e => update('numberOfEarningMembers', parseInt(e.target.value) || 0)} disabled={readOnly} />
+            <p className="text-[10px] text-slate-400 mt-1">People contributing to household income</p>
           </div>
           <div>
             <label className={labelClass}>Education Level</label>

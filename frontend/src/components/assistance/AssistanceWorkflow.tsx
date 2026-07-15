@@ -171,29 +171,35 @@ function AssistanceForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: 
         </div>
         <div>
           <label className="text-[10px] font-semibold text-slate-400 uppercase">Type</label>
-          <input value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}
+          <input required value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}
             placeholder="e.g. Surgery, Medication, Procedure"
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Category of assistance needed</p>
         </div>
         <div>
-          <label className="text-[10px] font-semibold text-slate-400 uppercase">Estimated Cost (Rs.)</label>
-          <input type="number" value={form.estimatedCost} onChange={e => setForm({ ...form, estimatedCost: parseFloat(e.target.value) || 0 })}
+          <label className="text-[10px] font-semibold text-slate-400 uppercase">Estimated Cost (Rs.) *</label>
+          <input type="number" required min="0" value={form.estimatedCost || ''} onChange={e => setForm({ ...form, estimatedCost: parseFloat(e.target.value) || 0 })}
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Total expected treatment cost</p>
         </div>
         <div>
           <label className="text-[10px] font-semibold text-slate-400 uppercase">Patient Contribution (Rs.)</label>
-          <input type="number" value={form.patientContribution} onChange={e => setForm({ ...form, patientContribution: parseFloat(e.target.value) || 0 })}
+          <input type="number" min="0" value={form.patientContribution || ''} onChange={e => setForm({ ...form, patientContribution: parseFloat(e.target.value) || 0 })}
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Amount the patient can pay</p>
         </div>
         <div>
-          <label className="text-[10px] font-semibold text-slate-400 uppercase">Foundation Contribution (Rs.)</label>
-          <input type="number" value={form.foundationContribution} onChange={e => setForm({ ...form, foundationContribution: parseFloat(e.target.value) || 0 })}
+          <label className="text-[10px] font-semibold text-slate-400 uppercase">Foundation Contribution (Rs.) *</label>
+          <input type="number" required min="0" value={form.foundationContribution || ''} onChange={e => setForm({ ...form, foundationContribution: parseFloat(e.target.value) || 0 })}
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Amount requested from foundation</p>
         </div>
         <div className="sm:col-span-2">
-          <label className="text-[10px] font-semibold text-slate-400 uppercase">Justification</label>
-          <textarea value={form.justification} onChange={e => setForm({ ...form, justification: e.target.value })}
+          <label className="text-[10px] font-semibold text-slate-400 uppercase">Justification *</label>
+          <textarea required value={form.justification} onChange={e => setForm({ ...form, justification: e.target.value })}
+            placeholder="Explain why this patient needs financial assistance..."
             rows={3} className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Medical and financial reasons for assistance</p>
         </div>
       </div>
       <div className="flex items-center gap-2 pt-2">

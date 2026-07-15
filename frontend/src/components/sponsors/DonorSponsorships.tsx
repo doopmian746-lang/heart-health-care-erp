@@ -129,39 +129,51 @@ function DonorForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: () =>
         <div>
           <label className="text-[10px] font-semibold text-slate-400 uppercase">Donor Name *</label>
           <input required value={form.donorName} onChange={e => setForm({ ...form, donorName: e.target.value })}
+            placeholder="Full name of the donor"
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">As it appears on the receipt</p>
         </div>
         <div>
           <label className="text-[10px] font-semibold text-slate-400 uppercase">Email</label>
           <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+            placeholder="donor@example.com"
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">For thank-you correspondence</p>
         </div>
         <div>
           <label className="text-[10px] font-semibold text-slate-400 uppercase">Phone</label>
           <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+            placeholder="0300-1234567"
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Optional contact number</p>
         </div>
         <div>
           <label className="text-[10px] font-semibold text-slate-400 uppercase">Amount (Rs.) *</label>
-          <input type="number" required value={form.amount} onChange={e => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })}
+          <input type="number" required min="1" value={form.amount || ''} onChange={e => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })}
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Total donation amount in PKR</p>
         </div>
         <div>
-          <label className="text-[10px] font-semibold text-slate-400 uppercase">Payment Method</label>
-          <select value={form.paymentMethod} onChange={e => setForm({ ...form, paymentMethod: e.target.value })}
+          <label className="text-[10px] font-semibold text-slate-400 uppercase">Payment Method *</label>
+          <select required value={form.paymentMethod} onChange={e => setForm({ ...form, paymentMethod: e.target.value })}
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             {['Bank Transfer', 'Cash', 'Cheque', 'Online', 'Other'].map(m => <option key={m} value={m}>{m}</option>)}
           </select>
+          <p className="text-[10px] text-slate-400 mt-1">How the donation was received</p>
         </div>
         <div>
-          <label className="text-[10px] font-semibold text-slate-400 uppercase">Project</label>
-          <input value={form.projectSponsorship} onChange={e => setForm({ ...form, projectSponsorship: e.target.value })}
+          <label className="text-[10px] font-semibold text-slate-400 uppercase">Project *</label>
+          <input required value={form.projectSponsorship} onChange={e => setForm({ ...form, projectSponsorship: e.target.value })}
+            placeholder="e.g. General Cardiac Fund"
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Which fund or project the donation supports</p>
         </div>
         <div className="sm:col-span-3">
-          <label className="text-[10px] font-semibold text-slate-400 uppercase">Notes</label>
-          <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={2}
+          <label className="text-[10px] font-semibold text-slate-400 uppercase">Receipt Number *</label>
+          <input required value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
+            placeholder="e.g. RCPT-2024-001"
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Official receipt or transaction reference number</p>
         </div>
       </div>
       <div className="flex items-center gap-2 pt-2">

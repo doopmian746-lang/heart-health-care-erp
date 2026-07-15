@@ -175,21 +175,25 @@ function FileRequestForm({ patients, onSubmit, onCancel }: { patients: any[]; on
           <label className="text-[10px] font-semibold text-slate-400 uppercase">Patient *</label>
           <select required value={form.patientId} onChange={e => setForm({ ...form, patientId: e.target.value })}
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="">Select...</option>
+            <option value="">Select patient...</option>
             {patients.map(p => <option key={p.id} value={p.id}>{p.fullName}</option>)}
           </select>
+          <p className="text-[10px] text-slate-400 mt-1">Patient whose file is needed</p>
         </div>
         <div className="sm:col-span-2">
           <label className="text-[10px] font-semibold text-slate-400 uppercase">Purpose *</label>
           <input required value={form.purpose} onChange={e => setForm({ ...form, purpose: e.target.value })}
+            placeholder="e.g. Hospital transfer, Specialist referral, Insurance claim..."
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Reason the file is being requested</p>
         </div>
         <div>
-          <label className="text-[10px] font-semibold text-slate-400 uppercase">Urgency</label>
-          <select value={form.urgency} onChange={e => setForm({ ...form, urgency: e.target.value })}
+          <label className="text-[10px] font-semibold text-slate-400 uppercase">Urgency *</label>
+          <select required value={form.urgency} onChange={e => setForm({ ...form, urgency: e.target.value })}
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             {['Low', 'Medium', 'High', 'Emergency'].map(u => <option key={u} value={u}>{u}</option>)}
           </select>
+          <p className="text-[10px] text-slate-400 mt-1">How quickly the file is needed</p>
         </div>
       </div>
       <div className="flex items-center gap-2 pt-2">

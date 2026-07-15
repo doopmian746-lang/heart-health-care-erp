@@ -122,29 +122,36 @@ function UserForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: () => 
   return (
     <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
       <h3 className="text-sm font-bold text-slate-900">Add New Staff Member</h3>
-      {error && <div className="text-xs text-rose-500">{error}</div>}
+      {error && <div className="text-xs text-rose-500 bg-rose-50 px-3 py-2 rounded-lg">{error}</div>}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] font-semibold text-slate-400 uppercase">Full Name *</label>
           <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+            placeholder="e.g. Dr. Ahmed Khan"
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Staff member's full display name</p>
         </div>
         <div>
           <label className="text-[10px] font-semibold text-slate-400 uppercase">Username *</label>
           <input required value={form.username} onChange={e => setForm({ ...form, username: e.target.value })}
+            placeholder="e.g. ahmed.khan"
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Used to log in to the system</p>
         </div>
         <div>
           <label className="text-[10px] font-semibold text-slate-400 uppercase">Password *</label>
           <input type="password" required value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
+            placeholder="Min. 6 characters"
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p className="text-[10px] text-slate-400 mt-1">Minimum 6 characters required</p>
         </div>
         <div>
           <label className="text-[10px] font-semibold text-slate-400 uppercase">Role *</label>
-          <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value as UserRole })}
+          <select required value={form.role} onChange={e => setForm({ ...form, role: e.target.value as UserRole })}
             className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             {['Admin', 'Doctor', 'Receptionist', 'Pharmacy Staff', 'Lab Staff'].map(r => <option key={r} value={r}>{r}</option>)}
           </select>
+          <p className="text-[10px] text-slate-400 mt-1">Determines system access permissions</p>
         </div>
       </div>
       <div className="flex items-center gap-2 pt-2">
