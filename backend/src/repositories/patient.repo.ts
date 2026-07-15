@@ -160,4 +160,47 @@ export const patientRepo = {
     const db = getDatabase();
     db.prepare('DELETE FROM patients WHERE id = ?').run(id);
   },
+
+  upsertMedicalHistory(patientId: string, data: {
+    chronicConditions?: string[];
+    lifestyleFactors?: string[];
+    familyHistory?: string[];
+    allergies?: string;
+    existingMedications?: string;
+    priorCardiacProcedures?: string[];
+    updatedBy?: string;
+  }): void {
+    const db = getDatabase();
+    const existing = db.prepare('SELECT patient_id FROM medical_histories WHERE patient_id = ?').get(patientId);
+    if (existing) {
+      const sets: string[] = [];
+      const params: any[] = [];
+      if (data.chronicConditions !== undefined) { sets.push('chronic_conditions = ?'); params.push(JSON.stringify(data.chronicConditions)); }
+      if (data.lifestyleFactors !== undefined) { sets.push('lifestyle_factors = ?'); params.push(JSON.stringify(data.lifestyleFactors)); }
+      if (data.familyHistory !== undefined) { sets.push('family_history = ?'); params.push(JSON.stringify(data.familyHistory)); }
+      if (data.allergies !== undefined) { sets.push('allergies = ?'); params.push(data.allergies); }
+      if (data.existingMedications !== undefined) { sets.push('existing_medications = ?'); params.push(data.existingMedications); }
+      if (data.priorCardiacProcedures !== undefined) { sets.push('prior_cardiac_procedures = ?'); params.push(JSON.stringify(data.priorCardiacProcedures)); }
+      sets.push('last_updated = datetime(\'now\')');
+      if (data.updatedBy) { sets.push('updated_by = ?'); params.push(data.updatedBy); }
+      if (sets.length > 1) {
+        params.push(patientId);
+        db.prepare(`UPDATE medical_histories SET ${sets.join(', ')} WHERE patient_id = ?`).run(...params);
+      }
+    } else {
+      db.prepare(`
+        INSERT INTO medical_histories (patient_id, chronic_conditions, lifestyle_factors, family_history, allergies, existing_medications, prior_cardiac_procedures, updated_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        patientId,
+        JSON.stringify(data.chronicConditions || []),
+        JSON.stringify(data.lifestyleFactors || []),
+        JSON.stringify(data.familyHistory || []),
+        data.allergies || 'None',
+        data.existingMedications || 'None',
+        JSON.stringify(data.priorCardiacProcedures || []),
+        data.updatedBy || '',
+      );
+    }
+  },
 };

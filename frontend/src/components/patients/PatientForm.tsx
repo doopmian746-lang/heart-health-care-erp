@@ -3,6 +3,8 @@ import { Patient, PatientSocioEconomic, BloodGroup } from '../../types';
 import { useAppStore } from '../../store/appStore';
 import PatientSocioEconomicForm, { emptySocioEconomic } from './PatientSocioEconomic';
 
+const API_BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api';
+
 interface Props {
   onComplete: () => void;
   editPatient?: Patient;
@@ -14,7 +16,7 @@ const selectClass = inputClass;
 
 export default function PatientForm({ onComplete, editPatient }: Props) {
   const token = useAppStore(s => s.token);
-  const [step, setStep] = useState<'basic' | 'socio'>('basic');
+  const [step, setStep] = useState<'basic' | 'socio' | 'medical'>('basic');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -36,6 +38,15 @@ export default function PatientForm({ onComplete, editPatient }: Props) {
 
   const [socio, setSocio] = useState<PatientSocioEconomic>(editPatient?.socioEconomic || emptySocioEconomic());
 
+  const [medical, setMedical] = useState({
+    chronicConditions: '' as string,
+    lifestyleFactors: '' as string,
+    familyHistory: '' as string,
+    allergies: '' as string,
+    existingMedications: '' as string,
+    priorCardiacProcedures: '' as string,
+  });
+
   const handleSubmit = async () => {
     if (!form.fullName.trim()) {
       setError('Full name is required');
@@ -46,7 +57,7 @@ export default function PatientForm({ onComplete, editPatient }: Props) {
 
     try {
       const body = { ...form, socioEconomic: socio };
-      const url = editPatient ? `/api/patients/${editPatient.id}` : '/api/patients';
+      const url = editPatient ? `${API_BASE}/patients/${editPatient.id}` : `${API_BASE}/patients`;
       const method = editPatient ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {
@@ -59,6 +70,29 @@ export default function PatientForm({ onComplete, editPatient }: Props) {
         const err = await res.json();
         throw new Error(err.error || err.details?.[0]?.message || 'Failed to save');
       }
+
+      const savedPatient = editPatient ? editPatient : await res.json();
+      const patientId = editPatient?.id || savedPatient.id;
+
+      const hasMedicalData = medical.chronicConditions || medical.lifestyleFactors || medical.familyHistory ||
+        medical.allergies || medical.existingMedications || medical.priorCardiacProcedures;
+
+      if (hasMedicalData && patientId) {
+        const parseList = (s: string) => s.split(',').map(i => i.trim()).filter(Boolean);
+        await fetch(`${API_BASE}/patients/${patientId}/medical-history`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            chronicConditions: parseList(medical.chronicConditions),
+            lifestyleFactors: parseList(medical.lifestyleFactors),
+            familyHistory: parseList(medical.familyHistory),
+            allergies: medical.allergies || 'None',
+            existingMedications: medical.existingMedications || 'None',
+            priorCardiacProcedures: parseList(medical.priorCardiacProcedures),
+          }),
+        });
+      }
+
       onComplete();
     } catch (err: any) {
       setError(err.message);
@@ -68,20 +102,33 @@ export default function PatientForm({ onComplete, editPatient }: Props) {
   };
 
   const update = (field: string, value: any) => setForm(f => ({ ...f, [field]: value }));
+  const updateMedical = (field: string, value: any) => setMedical(m => ({ ...m, [field]: value }));
+
+  const steps = [
+    { id: 'basic', label: 'Step 1: Basic Info' },
+    { id: 'socio', label: 'Step 2: Socio-Economic' },
+    { id: 'medical', label: 'Step 3: Medical History' },
+  ];
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm max-w-4xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <div className={`px-3 py-1 rounded-full text-xs font-bold ${step === 'basic' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-400'}`}>Step 1: Basic Info</div>
-        <div className="text-slate-300">→</div>
-        <div className={`px-3 py-1 rounded-full text-xs font-bold ${step === 'socio' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-400'}`}>Step 2: Socio-Economic</div>
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
+        {steps.map((s, i) => (
+          <React.Fragment key={s.id}>
+            {i > 0 && <div className="text-slate-300">→</div>}
+            <button onClick={() => setStep(s.id as any)}
+              className={`px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-colors ${step === s.id ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>
+              {s.label}
+            </button>
+          </React.Fragment>
+        ))}
       </div>
 
       {error && (
         <div className="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-lg">{error}</div>
       )}
 
-      {step === 'basic' ? (
+      {step === 'basic' && (
         <div className="space-y-6">
           <h3 className="font-bold text-sm text-slate-800 border-b border-slate-200 pb-2">Patient Demographics</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -158,12 +205,69 @@ export default function PatientForm({ onComplete, editPatient }: Props) {
             </button>
           </div>
         </div>
-      ) : (
+      )}
+
+      {step === 'socio' && (
         <div>
           <PatientSocioEconomicForm data={socio} onChange={setSocio} />
           <div className="flex justify-between pt-6 border-t border-slate-100 mt-6">
             <button onClick={() => setStep('basic')} className="px-4 py-2.5 bg-slate-100 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-200 transition-colors cursor-pointer">
               ← Back to Basic Info
+            </button>
+            <button onClick={() => setStep('medical')} className="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors cursor-pointer">
+              Next: Medical History →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 'medical' && (
+        <div className="space-y-6">
+          <h3 className="font-bold text-sm text-slate-800 border-b border-slate-200 pb-2">Medical History</h3>
+          <p className="text-xs text-slate-400">Separate multiple items with commas (e.g. "Hypertension, Diabetes")</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label className={labelClass}>Chronic Conditions</label>
+              <input className={inputClass} value={medical.chronicConditions}
+                onChange={e => updateMedical('chronicConditions', e.target.value)}
+                placeholder="e.g. Hypertension, Diabetes Type 2" />
+            </div>
+            <div className="md:col-span-2">
+              <label className={labelClass}>Lifestyle Factors</label>
+              <input className={inputClass} value={medical.lifestyleFactors}
+                onChange={e => updateMedical('lifestyleFactors', e.target.value)}
+                placeholder="e.g. Smoking, Sedentary, High salt diet" />
+            </div>
+            <div className="md:col-span-2">
+              <label className={labelClass}>Family History</label>
+              <input className={inputClass} value={medical.familyHistory}
+                onChange={e => updateMedical('familyHistory', e.target.value)}
+                placeholder="e.g. Heart Disease, Diabetes" />
+            </div>
+            <div>
+              <label className={labelClass}>Allergies</label>
+              <input className={inputClass} value={medical.allergies}
+                onChange={e => updateMedical('allergies', e.target.value)}
+                placeholder="e.g. Penicillin, None" />
+            </div>
+            <div>
+              <label className={labelClass}>Existing Medications</label>
+              <input className={inputClass} value={medical.existingMedications}
+                onChange={e => updateMedical('existingMedications', e.target.value)}
+                placeholder="e.g. Aspirin 75mg daily" />
+            </div>
+            <div className="md:col-span-2">
+              <label className={labelClass}>Prior Cardiac Procedures</label>
+              <input className={inputClass} value={medical.priorCardiacProcedures}
+                onChange={e => updateMedical('priorCardiacProcedures', e.target.value)}
+                placeholder="e.g. Angiography, Angioplasty, Bypass Surgery" />
+            </div>
+          </div>
+
+          <div className="flex justify-between pt-6 border-t border-slate-100">
+            <button onClick={() => setStep('socio')} className="px-4 py-2.5 bg-slate-100 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-200 transition-colors cursor-pointer">
+              ← Back to Socio-Economic
             </button>
             <button onClick={handleSubmit} disabled={submitting} className="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-2">
               {submitting ? 'Saving...' : editPatient ? 'Update Patient' : 'Register Patient'}

@@ -70,6 +70,14 @@ export const patientController = {
     };
 
     patientRepo.create(newPatient);
+
+    if (data.medicalHistory) {
+      patientRepo.upsertMedicalHistory(newPatient.id, {
+        ...data.medicalHistory,
+        updatedBy: req.user?.name || '',
+      });
+    }
+
     createAuditLog(req.user?.name || 'Front Desk', 'Patient Registered', 'Patient', newPatient.id, `Registered patient ${newPatient.fullName} (${newPatient.id})`);
     res.json(newPatient);
   },
@@ -98,6 +106,20 @@ export const patientController = {
     }
     patientRepo.delete(req.params.id);
     createAuditLog(req.user?.name || 'User', 'Patient Deleted', 'Patient', req.params.id, `Deleted patient ${existing.fullName}`);
+    res.json({ success: true });
+  },
+
+  updateMedicalHistory(req: AuthRequest, res: Response): void {
+    const existing = patientRepo.findById(req.params.id);
+    if (!existing) {
+      res.status(404).json({ error: 'Patient not found' });
+      return;
+    }
+    patientRepo.upsertMedicalHistory(req.params.id, {
+      ...req.body,
+      updatedBy: req.user?.name || '',
+    });
+    createAuditLog(req.user?.name || 'User', 'Medical History Updated', 'MedicalHistory', req.params.id, `Updated medical history for ${existing.fullName}`);
     res.json({ success: true });
   },
 };

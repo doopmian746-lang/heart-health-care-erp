@@ -9,6 +9,7 @@ router.get('/', authenticateToken, patientController.getAll);
 router.get('/:id', authenticateToken, patientController.getById);
 router.post('/', authenticateToken, validate(createPatientSchema), patientController.create);
 router.patch('/:id', authenticateToken, validate(updatePatientSchema), patientController.update);
+router.patch('/:id/medical-history', authenticateToken, patientController.updateMedicalHistory);
 router.delete('/:id', authenticateToken, patientController.delete);
 
 export default router;

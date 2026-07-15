@@ -100,6 +100,14 @@ export const createPatientSchema = z.object({
     hasInternet: z.boolean().optional().default(false),
     notes: z.string().optional().default(''),
   }).optional(),
+  medicalHistory: z.object({
+    chronicConditions: z.array(z.string()).optional().default([]),
+    lifestyleFactors: z.array(z.string()).optional().default([]),
+    familyHistory: z.array(z.string()).optional().default([]),
+    allergies: z.string().optional().default('None'),
+    existingMedications: z.string().optional().default('None'),
+    priorCardiacProcedures: z.array(z.string()).optional().default([]),
+  }).optional(),
 });
 
 export const createConsultationSchema = z.object({
