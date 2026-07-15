@@ -3,6 +3,8 @@ import { PatientDetailResponse, PatientSocioEconomic } from '../../types';
 import { useAppStore } from '../../store/appStore';
 import PatientSocioEconomicForm from './PatientSocioEconomic';
 
+const API_BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api';
+
 interface Props {
   patientId: string;
   onBack: () => void;
@@ -18,7 +20,7 @@ export default function PatientDetail({ patientId, onBack }: Props) {
     if (!token || !patientId) return;
     setLoading(true);
     setFetchError(null);
-    fetch(`/api/patients/${patientId}`, { headers: { 'Authorization': `Bearer ${token}` } })
+    fetch(`${API_BASE}/patients/${patientId}`, { headers: { 'Authorization': `Bearer ${token}` } })
       .then(r => { if (!r.ok) throw new Error('Failed to load patient'); return r.json(); })
       .then(setData)
       .catch(err => setFetchError(err.message))

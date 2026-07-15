@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { useAppStore } from '../store/appStore';
 
+const API_BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api';
+
 interface UseApiResult<T> {
   data: T | null;
   loading: boolean;
@@ -8,13 +10,18 @@ interface UseApiResult<T> {
   execute: (body?: any) => Promise<T | null>;
 }
 
+function resolveUrl(url: string): string {
+  if (url.startsWith('http')) return url;
+  return `${API_BASE}${url.startsWith('/') ? url : `/${url}`}`;
+}
+
 export function useApi<T>(url: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE' = 'GET'): UseApiResult<T> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const urlRef = useRef(url);
+  const urlRef = useRef(resolveUrl(url));
   const methodRef = useRef(method);
-  urlRef.current = url;
+  urlRef.current = resolveUrl(url);
   methodRef.current = method;
 
   const execute = useCallback(async (body?: any): Promise<T | null> => {
