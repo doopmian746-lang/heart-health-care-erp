@@ -172,6 +172,9 @@ function ConsultationDetail({ consultation: c, onBack }: { consultation: Consult
             <p className="text-xs text-slate-400 mt-1">Patient: <span className="font-mono text-blue-600">{c.patientId}</span> · {new Date(c.visitDate).toLocaleString()}</p>
             <p className="text-xs text-slate-400">Doctor: {c.doctorName}</p>
           </div>
+          {c.foundationReferral && (
+            <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full">Foundation Referral</span>
+          )}
         </div>
 
         <div>
@@ -199,7 +202,11 @@ function ConsultationDetail({ consultation: c, onBack }: { consultation: Consult
             { label: 'Symptoms', value: c.symptoms },
             { label: 'Examination Findings', value: c.examinationFindings },
             { label: 'Diagnosis', value: c.diagnosis },
+            { label: 'Investigations Ordered', value: c.investigations },
+            { label: 'Procedures', value: c.procedures },
+            { label: 'Referrals', value: c.referrals },
             { label: 'Doctor Notes / Treatment Plan', value: c.doctorNotes },
+            { label: 'Special Requirements', value: c.requirements },
             { label: 'Follow-up Instructions', value: c.followUpInstructions },
           ].filter(f => f.value).map(f => (
             <div key={f.label}>

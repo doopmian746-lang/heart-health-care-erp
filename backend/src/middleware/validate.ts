@@ -125,6 +125,11 @@ export const createConsultationSchema = z.object({
   examinationFindings: z.string().optional().default(''),
   diagnosis: z.string().optional().default(''),
   doctorNotes: z.string().optional().default(''),
+  investigations: z.string().optional().default(''),
+  procedures: z.string().optional().default(''),
+  referrals: z.string().optional().default(''),
+  foundationReferral: z.boolean().optional().default(false),
+  requirements: z.string().optional().default(''),
   followUpDate: z.string().optional().default(''),
   followUpInstructions: z.string().optional().default(''),
 });

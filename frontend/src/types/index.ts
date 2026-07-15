@@ -86,6 +86,11 @@ export interface Consultation {
   examinationFindings: string;
   diagnosis: string;
   doctorNotes: string;
+  investigations: string;
+  procedures: string;
+  referrals: string;
+  foundationReferral: boolean;
+  requirements: string;
   followUpDate: string;
   followUpInstructions: string;
   doctorName: string;
