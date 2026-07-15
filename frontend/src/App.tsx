@@ -6,6 +6,15 @@ import Header from './components/layout/Header';
 import Dashboard from './components/dashboard/Dashboard';
 import PatientManager from './components/patients/PatientManager';
 import PatientDetail from './components/patients/PatientDetail';
+import ConsultationList from './components/consultations/ConsultationList';
+import PrescriptionList from './components/prescriptions/PrescriptionList';
+import PharmacyInventory from './components/pharmacy/PharmacyInventory';
+import AssistanceWorkflow from './components/assistance/AssistanceWorkflow';
+import FileRequestList from './components/file-requests/FileRequestList';
+import ReportsAnalytics from './components/reports/ReportsAnalytics';
+import DonorSponsorships from './components/sponsors/DonorSponsorships';
+import AuditLogs from './components/audit-logs/AuditLogs';
+import SystemStaff from './components/users/SystemStaff';
 
 export default function App() {
   return (
@@ -40,15 +49,15 @@ function AppLayout() {
               />
             } />
             <Route path="patients/:id" element={<PatientDetailWrapper />} />
-            <Route path="consultations" element={<Placeholder title="Consultations" />} />
-            <Route path="prescriptions" element={<Placeholder title="Prescriptions" />} />
-            <Route path="pharmacy" element={<Placeholder title="Pharmacy Inventory" />} />
-            <Route path="assistance" element={<Placeholder title="Assistance Workflow" />} />
-            <Route path="file-requests" element={<Placeholder title="File Requests" />} />
-            <Route path="reports" element={<Placeholder title="Reports & Analytics" />} />
-            <Route path="sponsors" element={<Placeholder title="Donor Sponsorships" />} />
-            <Route path="audit-logs" element={<Placeholder title="Audit Logs" />} />
-            <Route path="users" element={<Placeholder title="System Staff" />} />
+            <Route path="consultations" element={<ConsultationList />} />
+            <Route path="prescriptions" element={<PrescriptionList />} />
+            <Route path="pharmacy" element={<PharmacyInventory />} />
+            <Route path="assistance" element={<AssistanceWorkflow />} />
+            <Route path="file-requests" element={<FileRequestList />} />
+            <Route path="reports" element={<ReportsAnalytics />} />
+            <Route path="sponsors" element={<DonorSponsorships />} />
+            <Route path="audit-logs" element={<AuditLogs />} />
+            <Route path="users" element={<SystemStaff />} />
           </Routes>
         </main>
       </div>
@@ -61,15 +70,4 @@ function PatientDetailWrapper() {
   const navigate = useNavigate();
   if (!id) return null;
   return <PatientDetail patientId={id} onBack={() => navigate('/app/patients')} />;
-}
-
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div className="flex items-center justify-center h-64">
-      <div className="text-center">
-        <h2 className="text-lg font-bold text-slate-800">{title}</h2>
-        <p className="text-sm text-slate-400 mt-1">Module being migrated — coming soon</p>
-      </div>
-    </div>
-  );
 }
