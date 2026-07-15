@@ -18,6 +18,7 @@ import donorRoutes from './routes/donor.routes.js';
 import fileRequestRoutes from './routes/file-request.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import auditRoutes from './routes/audit.routes.js';
+import publicRoutes from './routes/public.routes.js';
 
 process.on('uncaughtException', (err) => {
   console.error('UNCAUGHT EXCEPTION:', err.message);
@@ -77,6 +78,7 @@ app.use('/api/donor-payments', donorRoutes);
 app.use('/api/file-requests', fileRequestRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/audit-logs', auditRoutes);
+app.use('/api/public', publicRoutes);
 
 if (env.NODE_ENV === 'production') {
   const distPath = path.resolve(process.cwd(), '../frontend/dist');

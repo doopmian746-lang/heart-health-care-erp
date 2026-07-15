@@ -16,14 +16,38 @@ import DonorSponsorships from './components/sponsors/DonorSponsorships';
 import AuditLogs from './components/audit-logs/AuditLogs';
 import SystemStaff from './components/users/SystemStaff';
 
+import PublicNavbar from './components/public/Navbar';
+import PublicFooter from './components/public/Footer';
+import HomePage from './components/public/HomePage';
+import AboutPage from './components/public/AboutPage';
+import TeamPage from './components/public/TeamPage';
+import DonationsPage from './components/public/DonationsPage';
+import ContactPage from './components/public/ContactPage';
+
+function PublicLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen flex flex-col bg-white">
+      <PublicNavbar />
+      <div className="flex-1">{children}</div>
+      <PublicFooter />
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/login" element={<LoginView />} />
         <Route path="/app/*" element={<ProtectedRoute><AppLayout /></ProtectedRoute>} />
-        <Route path="/" element={<Navigate to="/app" replace />} />
-        <Route path="*" element={<Navigate to="/app" replace />} />
+
+        <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
+        <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
+        <Route path="/team" element={<PublicLayout><TeamPage /></PublicLayout>} />
+        <Route path="/donations" element={<PublicLayout><DonationsPage /></PublicLayout>} />
+        <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
+
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
