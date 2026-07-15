@@ -6,7 +6,6 @@ coverage/
 *.log
 .env
 .env.local
-.env.production
 !.env.example
 *.db
 data/*.db
