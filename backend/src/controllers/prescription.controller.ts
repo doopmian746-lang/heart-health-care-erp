@@ -36,4 +36,30 @@ export const prescriptionController = {
     createAuditLog(req.user?.name || 'Doctor', 'Prescription Created', 'Prescription', prescription.id, `Created prescription with ${prescription.items.length} item(s) for ${patient.fullName}`);
     res.json(prescription);
   },
+
+  updateStatus(req: AuthRequest, res: Response): void {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status || !['Dispensed', 'Partially Dispensed', 'Pending'].includes(status)) {
+      res.status(400).json({ error: 'Invalid status. Must be: Pending, Dispensed, or Partially Dispensed' });
+      return;
+    }
+
+    const existing = prescriptionRepo.findAll().find(p => p.id === id);
+    if (!existing) {
+      res.status(404).json({ error: 'Prescription not found' });
+      return;
+    }
+
+    const updated = prescriptionRepo.updateStatus(id, status);
+    createAuditLog(
+      req.user?.name || 'Staff',
+      'Prescription Status Updated',
+      'Prescription',
+      id,
+      `Status changed from ${existing.status} to ${status} for patient ${existing.patientId}`
+    );
+    res.json(updated);
+  },
 };

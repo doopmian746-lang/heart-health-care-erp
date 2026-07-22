@@ -44,4 +44,39 @@ router.get('/donations/recent', (_req, res) => {
   }
 });
 
+router.post('/donations', (req, res) => {
+  try {
+    const { donorName, email, phone, amount, paymentMethod, projectSponsorship, notes } = req.body;
+
+    if (!donorName || !donorName.trim()) {
+      res.status(400).json({ error: 'Donor name is required' });
+      return;
+    }
+    if (!amount || amount <= 0) {
+      res.status(400).json({ error: 'Valid donation amount is required' });
+      return;
+    }
+
+    const db = getDatabase();
+    const id = `DON-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    const receiptNumber = `RCT-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9999)).padStart(4, '0')}`;
+    const paymentDate = new Date().toISOString();
+
+    db.prepare(`
+      INSERT INTO donor_payments (id, donor_name, email, phone, amount, payment_date, payment_method, project_sponsorship, receipt_number, notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(id, donorName.trim(), email || '', phone || '', amount, paymentDate, paymentMethod || 'Online', projectSponsorship || 'General Cardiac Fund', receiptNumber, notes || '');
+
+    res.json({
+      success: true,
+      id,
+      receiptNumber,
+      message: `Thank you ${donorName}! Your donation of Rs. ${amount.toLocaleString()} has been recorded. Receipt: ${receiptNumber}`,
+    });
+  } catch (err) {
+    console.error('Donation error:', err);
+    res.status(500).json({ error: 'Failed to process donation' });
+  }
+});
+
 export default router;

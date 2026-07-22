@@ -162,9 +162,66 @@ export default function ConsultationList() {
 }
 
 function ConsultationDetail({ consultation: c, onBack }: { consultation: Consultation; onBack: () => void }) {
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    const fields = [
+      ['Chief Complaint', c.chiefComplaint],
+      ['Symptoms', c.symptoms],
+      ['Examination Findings', c.examinationFindings],
+      ['Diagnosis', c.diagnosis],
+      ['Investigations Ordered', c.investigations],
+      ['Procedures', c.procedures],
+      ['Referrals', c.referrals],
+      ['Doctor Notes / Treatment Plan', c.doctorNotes],
+      ['Special Requirements', c.requirements],
+      ['Follow-up Instructions', c.followUpInstructions],
+    ].filter(([, v]) => v);
+    const fieldRows = fields.map(([label, value]) => `<div style="margin-bottom:8px"><div style="font-size:9px;color:#9ca3af;text-transform:uppercase">${label}</div><div style="font-size:11px;margin-top:2px">${value}</div></div>`).join('');
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>Consultation ${c.id}</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; color: #333; font-size: 12px; }
+        .header { text-align: center; border-bottom: 2px solid #1e40af; padding-bottom: 10px; margin-bottom: 16px; }
+        .header h1 { color: #1e40af; font-size: 16px; margin: 0; }
+        .header p { color: #666; font-size: 11px; margin: 2px 0 0; }
+        h3 { font-size: 12px; color: #1e40af; border-bottom: 1px solid #e5e7eb; padding-bottom: 3px; margin: 14px 0 6px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+        .field .label { color: #9ca3af; font-size: 9px; text-transform: uppercase; }
+        .field .value { font-weight: 600; font-size: 11px; }
+        .footer { margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 8px; font-size: 9px; color: #9ca3af; text-align: center; }
+        @media print { body { padding: 10px; } }
+      </style></head><body>
+      <div class="header">
+        <h1>Heart Health Care Foundation</h1>
+        <p>Consultation Report</p>
+        <p>ID: ${c.id} · Patient: ${c.patientId} · Doctor: ${c.doctorName} · Date: ${new Date(c.visitDate).toLocaleDateString()}</p>
+      </div>
+      <h3>Vitals</h3>
+      <div class="grid">
+        <div class="field"><div class="label">Blood Pressure</div><div class="value">${c.vitals.bpSystolic}/${c.vitals.bpDiastolic} mmHg</div></div>
+        <div class="field"><div class="label">Pulse</div><div class="value">${c.vitals.pulse} bpm</div></div>
+        <div class="field"><div class="label">SpO2</div><div class="value">${c.vitals.spo2}%</div></div>
+        <div class="field"><div class="label">BMI</div><div class="value">${c.vitals.bmi.toFixed(1)}</div></div>
+        <div class="field"><div class="label">Weight</div><div class="value">${c.vitals.weight} kg</div></div>
+        <div class="field"><div class="label">Height</div><div class="value">${c.vitals.height} cm</div></div>
+      </div>
+      <h3>Clinical Details</h3>
+      ${fieldRows}
+      ${c.followUpDate ? `<div style="margin-top:8px"><div style="font-size:9px;color:#9ca3af;text-transform:uppercase">Follow-up Date</div><div style="font-size:11px;margin-top:2px;font-weight:600">${new Date(c.followUpDate).toLocaleDateString()}</div></div>` : ''}
+      <div class="footer">Heart Health Care Foundation — Consultation Record</div>
+      <script>window.onload=function(){window.print();}</script>
+      </body></html>`);
+    printWindow.document.close();
+  };
+
   return (
     <div className="space-y-4">
-      <button onClick={onBack} className="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer">&larr; Back to list</button>
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer">&larr; Back to list</button>
+        <button onClick={handlePrint} className="ml-auto px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 cursor-pointer flex items-center gap-2">
+          🖨️ Print Consultation
+        </button>
+      </div>
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
         <div className="flex items-start justify-between">
           <div>

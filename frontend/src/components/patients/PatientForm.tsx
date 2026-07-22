@@ -47,6 +47,9 @@ export default function PatientForm({ onComplete, editPatient }: Props) {
     priorCardiacProcedures: '' as string,
   });
 
+  const [submitted, setSubmitted] = useState(false);
+  const [savedId, setSavedId] = useState('');
+
   const handleSubmit = async () => {
     if (!form.fullName.trim()) {
       setError('Full name is required');
@@ -73,6 +76,7 @@ export default function PatientForm({ onComplete, editPatient }: Props) {
 
       const savedPatient = editPatient ? editPatient : await res.json();
       const patientId = editPatient?.id || savedPatient.id;
+      setSavedId(patientId);
 
       const hasMedicalData = medical.chronicConditions || medical.lifestyleFactors || medical.familyHistory ||
         medical.allergies || medical.existingMedications || medical.priorCardiacProcedures;
@@ -93,12 +97,59 @@ export default function PatientForm({ onComplete, editPatient }: Props) {
         });
       }
 
-      onComplete();
+      setSubmitted(true);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>Patient Registration - ${form.fullName}</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+        .header { text-align: center; border-bottom: 2px solid #1e40af; padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { color: #1e40af; font-size: 18px; margin: 0; }
+        .header p { color: #666; font-size: 12px; margin: 4px 0 0; }
+        .section { margin-bottom: 16px; }
+        .section h3 { font-size: 13px; color: #1e40af; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; margin-bottom: 8px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .field { font-size: 12px; }
+        .field .label { color: #9ca3af; font-size: 10px; text-transform: uppercase; }
+        .field .value { font-weight: 600; margin-top: 2px; }
+        .footer { margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 10px; font-size: 10px; color: #9ca3af; text-align: center; }
+        @media print { body { padding: 10px; } }
+      </style></head><body>
+      <div class="header">
+        <h1>Heart Health Care Foundation</h1>
+        <p>Patient Registration Card</p>
+        <p>Date: ${new Date().toLocaleDateString()}</p>
+      </div>
+      <div class="section">
+        <h3>Basic Information</h3>
+        <div class="grid">
+          <div class="field"><div class="label">Patient ID</div><div class="value">${savedId}</div></div>
+          <div class="field"><div class="label">Full Name</div><div class="value">${form.fullName}</div></div>
+          <div class="field"><div class="label">Father/Husband</div><div class="value">${form.fatherHusbandName || '-'}</div></div>
+          <div class="field"><div class="label">CNIC</div><div class="value">${form.cnic || '-'}</div></div>
+          <div class="field"><div class="label">Date of Birth</div><div class="value">${form.dob || '-'}</div></div>
+          <div class="field"><div class="label">Age</div><div class="value">${form.age}</div></div>
+          <div class="field"><div class="label">Gender</div><div class="value">${form.gender}</div></div>
+          <div class="field"><div class="label">Marital Status</div><div class="value">${form.maritalStatus}</div></div>
+          <div class="field"><div class="label">Occupation</div><div class="value">${form.occupation || '-'}</div></div>
+          <div class="field"><div class="label">Mobile</div><div class="value">${form.mobile || '-'}</div></div>
+          <div class="field"><div class="label">Blood Group</div><div class="value">${form.bloodGroup}</div></div>
+          <div class="field"><div class="label">Referred By</div><div class="value">${form.referredBy || '-'}</div></div>
+        </div>
+        <div class="field" style="margin-top:8px"><div class="label">Address</div><div class="value">${form.address || '-'}</div></div>
+      </div>
+      <div class="footer">Heart Health Care Foundation — Patient Registration Record</div>
+      <script>window.onload=function(){window.print();}</script>
+      </body></html>`);
+    printWindow.document.close();
   };
 
   const update = (field: string, value: any) => setForm(f => ({ ...f, [field]: value }));
@@ -109,6 +160,26 @@ export default function PatientForm({ onComplete, editPatient }: Props) {
     { id: 'socio', label: 'Step 2: Socio-Economic' },
     { id: 'medical', label: 'Step 3: Medical History' },
   ];
+
+  if (submitted) {
+    return (
+      <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm max-w-lg mx-auto text-center space-y-4">
+        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
+          <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+        </div>
+        <h3 className="text-lg font-bold text-slate-900">{editPatient ? 'Patient Updated' : 'Patient Registered'} Successfully</h3>
+        <p className="text-sm text-slate-500">Patient ID: <span className="font-mono text-blue-600">{savedId}</span></p>
+        <div className="flex items-center justify-center gap-3 pt-4">
+          <button onClick={handlePrint} className="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 cursor-pointer flex items-center gap-2">
+            🖨️ Print Registration Card
+          </button>
+          <button onClick={onComplete} className="px-6 py-2.5 bg-slate-100 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-200 cursor-pointer">
+            Done
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm max-w-4xl mx-auto">

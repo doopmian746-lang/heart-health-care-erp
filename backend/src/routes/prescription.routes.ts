@@ -7,5 +7,6 @@ const router = Router();
 
 router.get('/', authenticateToken, prescriptionController.getAll);
 router.post('/patient/:id', authenticateToken, requireRole('Admin', 'Doctor'), validate(createPrescriptionSchema), prescriptionController.create);
+router.patch('/:id', authenticateToken, requireRole('Admin', 'Pharmacy Staff'), prescriptionController.updateStatus);
 
 export default router;

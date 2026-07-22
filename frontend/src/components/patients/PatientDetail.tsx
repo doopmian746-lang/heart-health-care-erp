@@ -34,12 +34,72 @@ export default function PatientDetail({ patientId, onBack }: Props) {
   const { patient, medicalHistory, consultations, prescriptions, assistanceHistory } = data;
   const se = patient.socioEconomic;
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    const conds = medicalHistory?.chronicConditions?.join(', ') || 'None';
+    const allergies = medicalHistory?.allergies || 'None';
+    const meds = medicalHistory?.existingMedications || 'None';
+    const procs = medicalHistory?.priorCardiacProcedures?.join(', ') || 'None';
+    const consultRows = consultations.slice(0, 10).map(c => `<tr><td>${new Date(c.visitDate).toLocaleDateString()}</td><td>${c.doctorName}</td><td>${c.diagnosis || '—'}</td><td>${c.chiefComplaint || '—'}</td></tr>`).join('');
+    const rxRows = prescriptions.slice(0, 10).map(p => `<tr><td>${new Date(p.date).toLocaleDateString()}</td><td>${p.doctorName}</td><td>${p.items.map(i => i.medicineName).join(', ')}</td><td>${p.status}</td></tr>`).join('');
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>Patient Report - ${patient.fullName}</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; color: #333; font-size: 12px; }
+        .header { text-align: center; border-bottom: 2px solid #1e40af; padding-bottom: 10px; margin-bottom: 16px; }
+        .header h1 { color: #1e40af; font-size: 16px; margin: 0; }
+        .header p { color: #666; font-size: 11px; margin: 2px 0 0; }
+        h3 { font-size: 12px; color: #1e40af; border-bottom: 1px solid #e5e7eb; padding-bottom: 3px; margin: 14px 0 6px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+        .field .label { color: #9ca3af; font-size: 9px; text-transform: uppercase; }
+        .field .value { font-weight: 600; font-size: 11px; }
+        table { width: 100%; border-collapse: collapse; font-size: 10px; }
+        th, td { border: 1px solid #e5e7eb; padding: 4px 6px; text-align: left; }
+        th { background: #f8fafc; font-weight: 600; }
+        .footer { margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 8px; font-size: 9px; color: #9ca3af; text-align: center; }
+        @media print { body { padding: 10px; } }
+      </style></head><body>
+      <div class="header">
+        <h1>Heart Health Care Foundation</h1>
+        <p>Patient Report — ${patient.fullName}</p>
+        <p>ID: ${patient.patientCode || patient.id} · Generated: ${new Date().toLocaleDateString()}</p>
+      </div>
+      <h3>Demographics</h3>
+      <div class="grid">
+        <div class="field"><div class="label">Name</div><div class="value">${patient.fullName}</div></div>
+        <div class="field"><div class="label">Father/Husband</div><div class="value">${patient.fatherHusbandName || '-'}</div></div>
+        <div class="field"><div class="label">CNIC</div><div class="value">${patient.cnic || '-'}</div></div>
+        <div class="field"><div class="label">Age/Gender</div><div class="value">${patient.age} / ${patient.gender}</div></div>
+        <div class="field"><div class="label">Mobile</div><div class="value">${patient.mobile || '-'}</div></div>
+        <div class="field"><div class="label">Blood Group</div><div class="value">${patient.bloodGroup}</div></div>
+        <div class="field"><div class="label">Occupation</div><div class="value">${patient.occupation || '-'}</div></div>
+        <div class="field"><div class="label">Marital Status</div><div class="value">${patient.maritalStatus}</div></div>
+        <div class="field"><div class="label">Address</div><div class="value">${patient.address || '-'}</div></div>
+      </div>
+      <h3>Medical History</h3>
+      <div class="grid">
+        <div class="field"><div class="label">Chronic Conditions</div><div class="value">${conds}</div></div>
+        <div class="field"><div class="label">Allergies</div><div class="value">${allergies}</div></div>
+        <div class="field"><div class="label">Existing Medications</div><div class="value">${meds}</div></div>
+      </div>
+      <div class="field" style="margin-top:6px"><div class="label">Prior Cardiac Procedures</div><div class="value">${procs}</div></div>
+      ${consultations.length > 0 ? `<h3>Consultations (${consultations.length})</h3><table><thead><tr><th>Date</th><th>Doctor</th><th>Diagnosis</th><th>Complaint</th></tr></thead><tbody>${consultRows}</tbody></table>` : ''}
+      ${prescriptions.length > 0 ? `<h3>Prescriptions (${prescriptions.length})</h3><table><thead><tr><th>Date</th><th>Doctor</th><th>Medicines</th><th>Status</th></tr></thead><tbody>${rxRows}</tbody></table>` : ''}
+      <div class="footer">Heart Health Care Foundation — Patient Medical Record</div>
+      <script>window.onload=function(){window.print();}</script>
+      </body></html>`);
+    printWindow.document.close();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <button onClick={onBack} className="px-3 py-1.5 bg-slate-100 text-slate-600 text-sm rounded-lg hover:bg-slate-200 cursor-pointer">← Back</button>
         <h2 className="text-lg font-bold text-slate-900">{patient.fullName}</h2>
         <span className="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-0.5 rounded">{patient.patientCode}</span>
+        <button onClick={handlePrint} className="ml-auto px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 cursor-pointer flex items-center gap-2">
+          🖨️ Print
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
