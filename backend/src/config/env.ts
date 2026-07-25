@@ -26,4 +26,9 @@ export const env = {
   DATABASE_PATH: process.env.DATABASE_PATH || defaultDbPath,
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:5173',
   ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'admin@heartfoundation.org',
+  CASHMAAL_WEB_ID: process.env.CASHMAAL_WEB_ID || '',
+  CASHMAAL_IPN_KEY: process.env.CASHMAAL_IPN_KEY || '',
+  CASHMAAL_PAYOUT_KEY: process.env.CASHMAAL_PAYOUT_KEY || '',
+  SITE_URL: process.env.SITE_URL || 'https://heart-health-care-erp.vercel.app',
+  BACKEND_URL: process.env.BACKEND_URL || 'https://web-production-d7657.up.railway.app',
 };

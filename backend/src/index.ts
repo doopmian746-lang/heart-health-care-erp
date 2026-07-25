@@ -20,6 +20,7 @@ import dashboardRoutes from './routes/dashboard.routes.js';
 import auditRoutes from './routes/audit.routes.js';
 import publicRoutes from './routes/public.routes.js';
 import reportsRoutes from './routes/reports.routes.js';
+import donationRoutes from './routes/donation.routes.js';
 
 process.on('uncaughtException', (err) => {
   console.error('UNCAUGHT EXCEPTION:', err.message);
@@ -81,6 +82,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/audit-logs', auditRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/donations', donationRoutes);
 
 if (env.NODE_ENV === 'production') {
   const distPath = path.resolve(process.cwd(), '../frontend/dist');

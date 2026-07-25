@@ -1,381 +1,310 @@
-import { useEffect, useState } from 'react';
-import { Heart, TrendingUp, Users, HandHeart, CheckCircle, Copy, CreditCard, Smartphone, Building2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useAppStore } from '../../store/appStore';
 
 const API_BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api';
 
-interface Account {
-  id: string;
-  type: string;
-  bank_name: string;
-  account_title: string;
-  account_number: string;
-  iban: string;
-  branch_code: string;
-  phone_number: string;
+interface DonationForm {
+  donorName: string;
+  email: string;
+  phone: string;
+  amount: number;
+  currency: 'PKR' | 'USD';
+  projectSponsorship: string;
+  notes: string;
 }
 
-export default function DonationsPage() {
-  const [stats, setStats] = useState<any>(null);
-  const [recent, setRecent] = useState<any[]>([]);
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [step, setStep] = useState<'form' | 'payment' | 'submitted'>('form');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [result, setResult] = useState<any>(null);
-  const [copied, setCopied] = useState('');
+const PROJECTS = [
+  'General Cardiac Fund',
+  'Patient Treatment Fund',
+  'Surgery Sponsorship',
+  'Medicine Fund',
+  'Children Heart Fund',
+  'Emergency Medical Aid',
+  'General Donation',
+];
 
-  const [form, setForm] = useState({
-    donorName: '',
-    email: '',
-    phone: '',
-    amount: '',
-    paymentMethod: 'Bank Transfer',
-    projectSponsorship: 'General Cardiac Fund',
-    notes: '',
+export default function DonationsPage() {
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState<DonationForm>({
+    donorName: '', email: '', phone: '',
+    amount: 0, currency: 'PKR',
+    projectSponsorship: 'General Cardiac Fund', notes: '',
   });
-  const [transactionId, setTransactionId] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState<{ status: string; transactionId?: string; amount?: string; currency?: string } | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      fetch(`${API_BASE}/public/stats`).then(r => r.json()),
-      fetch(`${API_BASE}/public/donations/recent`).then(r => r.json()),
-      fetch(`${API_BASE}/public/foundation-accounts`).then(r => r.json()),
-    ]).then(([s, d, a]) => { setStats(s); setRecent(d); setAccounts(a); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status');
+    if (status) {
+      setResult({
+        status,
+        transactionId: params.get('transactionId') || undefined,
+        amount: params.get('amount') || undefined,
+        currency: params.get('currency') || undefined,
+      });
+      window.history.replaceState({}, '', '/donate');
+    }
   }, []);
 
-  const copyToClipboard = (text: string, field: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(field);
-      setTimeout(() => setCopied(''), 2000);
-    });
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.donorName.trim() || !form.amount || parseFloat(form.amount) <= 0) {
-      setError('Please fill in your name and a valid donation amount.');
-      return;
-    }
-    setError('');
-    setStep('payment');
-  };
+    if (!form.donorName || !form.email || form.amount <= 0) return;
+    setSubmitting(true);
 
-  const handleFinalSubmit = async () => {
-    if (!transactionId.trim()) {
-      setError('Please enter the Transaction ID / Reference Number from your payment.');
-      return;
-    }
-    setSaving(true);
-    setError('');
     try {
-      const res = await fetch(`${API_BASE}/public/donations`, {
+      const payload = {
+        ...form,
+        payMethod: '',
+        projectSponsorship: form.projectSponsorship,
+      };
+
+      const res = await fetch(`${API_BASE}/donations/initiate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, amount: parseFloat(form.amount), transactionId: transactionId.trim() }),
+        body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to process donation');
-      setResult(data);
-      setStep('submitted');
-      fetch(`${API_BASE}/public/donations/recent`).then(r => r.json()).then(setRecent).catch(() => {});
-      fetch(`${API_BASE}/public/stats`).then(r => r.json()).then(setStats).catch(() => {});
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setSaving(false);
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || 'Failed to initiate donation');
+        setSubmitting(false);
+        return;
+      }
+
+      const html = await res.text();
+      const newWindow = window.open('', '_self');
+      if (newWindow) {
+        newWindow.document.write(html);
+        newWindow.document.close();
+      }
+    } catch {
+      alert('Failed to connect to payment service');
+      setSubmitting(false);
     }
   };
 
-  const getAccountsByType = (type: string) => accounts.filter(a => a.type === type);
-
-  const selectedAccount = accounts.find(a =>
-    (form.paymentMethod === 'Bank Transfer' && a.type === 'Bank') ||
-    (form.paymentMethod === 'EasyPaisa' && a.type === 'EasyPaisa') ||
-    (form.paymentMethod === 'JazzCash' && a.type === 'JazzCash')
-  );
+  if (result) {
+    return <DonationResult result={result} onReset={() => { setResult(null); setStep(1); setForm({ donorName: '', email: '', phone: '', amount: 0, currency: 'PKR', projectSponsorship: 'General Cardiac Fund', notes: '' }); }} />;
+  }
 
   return (
-    <div>
-      <section className="bg-gradient-to-br from-slate-900 to-rose-900 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold">Donations & Sponsorships</h1>
-          <p className="text-slate-400 mt-3 max-w-2xl">Your generosity helps us save lives. Transfer directly to our bank, EasyPaisa, or JazzCash account.</p>
-        </div>
-      </section>
-
-      {loading && <div className="text-center py-20 text-slate-400">Loading...</div>}
-
-      {stats && (
-        <section className="py-12 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { label: 'Total Donors', value: stats.donationCount, icon: Users, color: 'bg-blue-50 text-blue-600' },
-                { label: 'Total Donated', value: `Rs. ${stats.totalDonations.toLocaleString()}`, icon: TrendingUp, color: 'bg-emerald-50 text-emerald-600' },
-                { label: 'Patients Assisted', value: stats.totalAssistance, icon: HandHeart, color: 'bg-amber-50 text-amber-600' },
-                { label: 'Funds Granted', value: `Rs. ${stats.fundsGranted.toLocaleString()}`, icon: Heart, color: 'bg-rose-50 text-rose-600' },
-              ].map((kpi, i) => {
-                const Icon = kpi.icon;
-                return (
-                  <div key={i} className="text-center p-5 rounded-2xl bg-slate-50 border border-slate-100">
-                    <div className={`inline-flex p-2.5 rounded-xl ${kpi.color} mb-2`}><Icon className="w-5 h-5" /></div>
-                    <p className="text-xl font-bold text-slate-900">{kpi.value}</p>
-                    <p className="text-[10px] text-slate-500 mt-1 font-medium">{kpi.label}</p>
-                  </div>
-                );
-              })}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-blue-50/20">
+      <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+        <div className="max-w-2xl mx-auto px-4 py-6 text-center">
+          <div className="inline-flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center shadow-lg shadow-rose-500/30">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">Make a Donation</h1>
+              <p className="text-sm text-slate-500">Heart Health Care Foundation</p>
             </div>
           </div>
-        </section>
-      )}
+          <p className="text-sm text-slate-600 max-w-lg mx-auto">Your generous donation helps us provide life-saving cardiac care to patients in need across Pakistan.</p>
+        </div>
+      </header>
 
-      <section className="py-12 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            {/* Left: Recent Donations */}
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Recent Donations</h2>
-              {recent.length > 0 ? (
-                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase">
-                          <th className="text-left px-5 py-3">Donor</th>
-                          <th className="text-right px-5 py-3">Amount</th>
-                          <th className="text-left px-5 py-3">Date</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {recent.map((d, i) => (
-                          <tr key={i} className="hover:bg-slate-50">
-                            <td className="px-5 py-3">
-                              <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-rose-100 flex items-center justify-center text-[10px] font-bold text-rose-700">{d.donor_name?.charAt(0) || 'D'}</div>
-                                <span className="font-medium text-slate-800 text-xs">{d.donor_name}</span>
-                              </div>
-                            </td>
-                            <td className="px-5 py-3 text-right font-mono font-medium text-emerald-700 text-xs">Rs. {d.amount.toLocaleString()}</td>
-                            <td className="px-5 py-3 text-xs text-slate-400">{new Date(d.payment_date).toLocaleDateString()}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+      <main className="max-w-2xl mx-auto px-4 py-8">
+        {/* Step Indicator */}
+        <div className="flex items-center justify-center gap-2 mb-8">
+          {[1, 2].map(s => (
+            <div key={s} className="flex items-center gap-2">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${step >= s ? 'bg-rose-600 text-white' : 'bg-slate-200 text-slate-500'}`}>{s}</div>
+              <span className={`text-xs font-medium ${step >= s ? 'text-rose-700' : 'text-slate-400'}`}>{s === 1 ? 'Your Details' : 'Payment'}</span>
+              {s < 2 && <div className={`w-12 h-0.5 ${step > 1 ? 'bg-rose-600' : 'bg-slate-200'}`} />}
+            </div>
+          ))}
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          {step === 1 && (
+            <div className="bg-white rounded-3xl shadow-xl border border-slate-200/60 p-8 space-y-5">
+              <h2 className="text-lg font-bold text-slate-900">Your Information</h2>
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase">Full Name *</label>
+                <input required value={form.donorName} onChange={e => setForm({ ...form, donorName: e.target.value })}
+                  placeholder="Enter your full name"
+                  className="w-full mt-1 px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-500 uppercase">Email *</label>
+                  <input type="email" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+                    placeholder="your@email.com"
+                    className="w-full mt-1 px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-500 uppercase">Phone</label>
+                  <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+                    placeholder="+92 3XX XXXXXXX"
+                    className="w-full mt-1 px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent" />
+                </div>
+              </div>
+              <button type="button" onClick={() => setStep(2)}
+                className="w-full py-3 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-700 transition-colors cursor-pointer text-sm">
+                Continue to Payment →
+              </button>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-5">
+              <div className="bg-white rounded-3xl shadow-xl border border-slate-200/60 p-8 space-y-5">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-slate-900">Donation Amount</h2>
+                  <button type="button" onClick={() => setStep(1)} className="text-xs text-rose-600 hover:text-rose-700 cursor-pointer">← Edit Details</button>
+                </div>
+
+                {/* Quick Amount Buttons */}
+                <div className="grid grid-cols-4 gap-2">
+                  {[500, 1000, 2500, 5000, 10000, 25000, 50000, 100000].map(amt => (
+                    <button key={amt} type="button" onClick={() => setForm({ ...form, amount: amt })}
+                      className={`py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${form.amount === amt ? 'bg-rose-600 text-white shadow-lg shadow-rose-500/30' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                      Rs. {amt.toLocaleString()}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500 uppercase">Amount ({form.currency}) *</label>
+                    <input type="number" required min="1" value={form.amount || ''} onChange={e => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })}
+                      placeholder="Enter amount"
+                      className="w-full mt-1 px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500 uppercase">Currency</label>
+                    <div className="flex mt-1">
+                      <button type="button" onClick={() => setForm({ ...form, currency: 'PKR' })}
+                        className={`flex-1 py-3 text-xs font-bold rounded-l-xl border cursor-pointer transition-colors ${form.currency === 'PKR' ? 'bg-rose-600 text-white border-rose-600' : 'bg-slate-50 text-slate-600 border-slate-300'}`}>
+                        PKR
+                      </button>
+                      <button type="button" onClick={() => setForm({ ...form, currency: 'USD' })}
+                        className={`flex-1 py-3 text-xs font-bold rounded-r-xl border cursor-pointer transition-colors ${form.currency === 'USD' ? 'bg-rose-600 text-white border-rose-600' : 'bg-slate-50 text-slate-600 border-slate-300'}`}>
+                        USD
+                      </button>
+                    </div>
                   </div>
                 </div>
-              ) : (
-                <div className="text-center py-10 text-slate-400 text-sm">No donations yet.</div>
-              )}
-            </div>
 
-            {/* Right: Donation Flow */}
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Make a Donation</h2>
+                <div>
+                  <label className="text-xs font-semibold text-slate-500 uppercase">Sponsorship Project</label>
+                  <select value={form.projectSponsorship} onChange={e => setForm({ ...form, projectSponsorship: e.target.value })}
+                    className="w-full mt-1 px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                    {PROJECTS.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                </div>
 
-              {/* Step Indicator */}
-              <div className="flex items-center gap-2 mb-6">
-                {[
-                  { n: 1, label: 'Your Details' },
-                  { n: 2, label: 'Payment' },
-                  { n: 3, label: 'Done' },
-                ].map((s, i) => (
-                  <div key={s.n} className="flex items-center gap-2">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${step === 'form' && s.n === 1 || step === 'payment' && s.n === 2 || step === 'submitted' && s.n === 3 ? 'bg-rose-600 text-white' : 'bg-slate-200 text-slate-500'}`}>{s.n}</div>
-                    <span className="text-xs text-slate-500 hidden sm:inline">{s.label}</span>
-                    {i < 2 && <div className="w-8 h-px bg-slate-300" />}
-                  </div>
-                ))}
+                <div>
+                  <label className="text-xs font-semibold text-slate-500 uppercase">Message (optional)</label>
+                  <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={2}
+                    placeholder="Any special message or dedication..."
+                    className="w-full mt-1 px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent" />
+                </div>
               </div>
 
-              {error && <div className="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-lg">{error}</div>}
-
-              {/* STEP 1: Donor Info */}
-              {step === 'form' && (
-                <form onSubmit={handleFormSubmit} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Your Name *</label>
-                    <input required value={form.donorName} onChange={e => setForm({ ...form, donorName: e.target.value })}
-                      placeholder="Enter your full name"
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Email</label>
-                      <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
-                        placeholder="you@example.com"
-                        className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Phone</label>
-                      <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
-                        placeholder="0300-1234567"
-                        className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Donation Amount (Rs.) *</label>
-                    <input type="number" required min="1" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })}
-                      placeholder="Enter amount"
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Payment Method *</label>
-                      <select value={form.paymentMethod} onChange={e => setForm({ ...form, paymentMethod: e.target.value })}
-                        className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="EasyPaisa">EasyPaisa</option>
-                        <option value="JazzCash">JazzCash</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Project</label>
-                      <select value={form.projectSponsorship} onChange={e => setForm({ ...form, projectSponsorship: e.target.value })}
-                        className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
-                        {['General Cardiac Fund', 'Patient Sponsorship', 'Surgery Fund', 'Medication Fund', 'Equipment Fund'].map(p => <option key={p} value={p}>{p}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Notes (optional)</label>
-                    <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
-                      rows={2} placeholder="Any special instructions..."
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500" />
-                  </div>
-                  <button type="submit"
-                    className="w-full py-3 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 cursor-pointer transition-colors">
-                    Continue to Payment →
-                  </button>
-                </form>
-              )}
-
-              {/* STEP 2: Payment Instructions */}
-              {step === 'payment' && (
-                <div className="space-y-4">
-                  {/* Foundation Account Details */}
-                  <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4">
-                      {form.paymentMethod === 'Bank Transfer' && <Building2 className="w-5 h-5 text-blue-600" />}
-                      {form.paymentMethod === 'EasyPaisa' && <Smartphone className="w-5 h-5 text-emerald-600" />}
-                      {form.paymentMethod === 'JazzCash' && <CreditCard className="w-5 h-5 text-red-600" />}
-                      <h3 className="font-bold text-sm text-slate-900">Transfer to Foundation {form.paymentMethod === 'Bank Transfer' ? 'Bank Account' : form.paymentMethod}</h3>
-                    </div>
-
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-                      <p className="text-xs font-bold text-amber-800">Transfer Amount: <span className="text-lg">Rs. {form.amount ? parseInt(form.amount).toLocaleString() : '0'}</span></p>
-                    </div>
-
-                    {selectedAccount ? (
-                      <div className="space-y-3">
-                        {selectedAccount.bank_name && (
-                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                            <div><p className="text-[10px] text-slate-400 uppercase">Bank</p><p className="text-sm font-medium">{selectedAccount.bank_name}</p></div>
-                          </div>
-                        )}
-                        {selectedAccount.account_title && (
-                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                            <div><p className="text-[10px] text-slate-400 uppercase">Account Title</p><p className="text-sm font-medium">{selectedAccount.account_title}</p></div>
-                            <button onClick={() => copyToClipboard(selectedAccount.account_title, 'title')} className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer">{copied === 'title' ? 'Copied!' : 'Copy'}</button>
-                          </div>
-                        )}
-                        {selectedAccount.account_number && (
-                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                            <div><p className="text-[10px] text-slate-400 uppercase">Account Number</p><p className="text-sm font-mono font-bold">{selectedAccount.account_number}</p></div>
-                            <button onClick={() => copyToClipboard(selectedAccount.account_number, 'acc')} className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer">{copied === 'acc' ? 'Copied!' : 'Copy'}</button>
-                          </div>
-                        )}
-                        {selectedAccount.iban && (
-                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                            <div><p className="text-[10px] text-slate-400 uppercase">IBAN</p><p className="text-sm font-mono font-bold">{selectedAccount.iban}</p></div>
-                            <button onClick={() => copyToClipboard(selectedAccount.iban, 'iban')} className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer">{copied === 'iban' ? 'Copied!' : 'Copy'}</button>
-                          </div>
-                        )}
-                        {selectedAccount.branch_code && (
-                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                            <div><p className="text-[10px] text-slate-400 uppercase">Branch Code</p><p className="text-sm font-mono">{selectedAccount.branch_code}</p></div>
-                          </div>
-                        )}
-                        {selectedAccount.phone_number && (
-                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                            <div><p className="text-[10px] text-slate-400 uppercase">{selectedAccount.type} Number</p><p className="text-sm font-mono font-bold">{selectedAccount.phone_number}</p></div>
-                            <button onClick={() => copyToClipboard(selectedAccount.phone_number, 'phone')} className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer">{copied === 'phone' ? 'Copied!' : 'Copy'}</button>
-                          </div>
-                        )}
+              {/* Payment Methods Info */}
+              <div className="bg-white rounded-3xl shadow-xl border border-slate-200/60 p-8">
+                <h3 className="text-sm font-bold text-slate-900 mb-4">Available Payment Methods</h3>
+                <p className="text-xs text-slate-500 mb-4">After clicking "Donate Now", you'll be redirected to our secure payment gateway where you can choose:</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {[
+                    { name: 'JazzCash', icon: '📱', desc: 'Mobile Wallet' },
+                    { name: 'EasyPaisa', icon: '💚', desc: 'Mobile Wallet' },
+                    { name: 'Bank Transfer', icon: '🏦', desc: 'All Banks' },
+                    { name: 'Debit Card', icon: '💳', desc: 'Visa/MasterCard' },
+                    { name: 'Credit Card', icon: '💎', desc: 'Visa/MasterCard' },
+                    { name: 'Raast', icon: '⚡', desc: 'Instant Transfer' },
+                  ].map(m => (
+                    <div key={m.name} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-100">
+                      <span className="text-lg">{m.icon}</span>
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-800">{m.name}</p>
+                        <p className="text-[9px] text-slate-400">{m.desc}</p>
                       </div>
-                    ) : (
-                      <p className="text-xs text-slate-400">Account details not configured. Please contact us.</p>
-                    )}
-
-                    <div className="mt-4 p-3 bg-blue-50 rounded-xl">
-                      <p className="text-[10px] text-blue-600 font-semibold uppercase mb-1">Payment Instructions</p>
-                      <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
-                        <li>Open your {form.paymentMethod} app or visit branch</li>
-                        <li>Transfer <strong>Rs. {form.amount ? parseInt(form.amount).toLocaleString() : '0'}</strong> to the account above</li>
-                        <li>Copy the <strong>Transaction ID / Reference Number</strong></li>
-                        <li>Paste it below and click Submit</li>
-                      </ol>
                     </div>
-                  </div>
-
-                  {/* Transaction ID Input */}
-                  <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Transaction ID / Reference Number *</label>
-                      <input value={transactionId} onChange={e => setTransactionId(e.target.value)}
-                        placeholder="e.g. 202607251234567890 (from your payment receipt)"
-                        className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono" />
-                      <p className="text-[10px] text-slate-400 mt-1">This is the reference number shown after you complete the transfer. Required for verification.</p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <button onClick={() => { setStep('form'); setError(''); }}
-                        className="px-4 py-2.5 bg-slate-100 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-200 cursor-pointer">
-                        ← Back
-                      </button>
-                      <button onClick={handleFinalSubmit} disabled={saving}
-                        className="flex-1 py-3 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 disabled:opacity-50 cursor-pointer transition-colors">
-                        {saving ? 'Submitting...' : 'Submit Donation'}
-                      </button>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              )}
+              </div>
 
-              {/* STEP 3: Success */}
-              {step === 'submitted' && result && (
-                <div className="bg-white border border-emerald-200 rounded-2xl p-8 shadow-sm text-center space-y-4">
-                  <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto" />
-                  <h3 className="text-xl font-bold text-slate-900">Donation Submitted!</h3>
-                  <p className="text-sm text-slate-600">{result.message}</p>
-                  <div className="bg-slate-50 rounded-xl p-4 space-y-2">
-                    <div className="flex justify-between text-xs"><span className="text-slate-400">Receipt Number</span><span className="font-mono font-bold text-slate-800">{result.receiptNumber}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-slate-400">Amount</span><span className="font-bold text-emerald-700">Rs. {form.amount ? parseInt(form.amount).toLocaleString() : '0'}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-slate-400">Status</span><span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-[10px] font-medium">Pending Verification</span></div>
-                  </div>
-                  <p className="text-[10px] text-slate-400">Our team will verify your donation within 24 hours. You will receive confirmation via email/phone.</p>
-                  <button onClick={() => { setStep('form'); setForm({ donorName: '', email: '', phone: '', amount: '', paymentMethod: 'Bank Transfer', projectSponsorship: 'General Cardiac Fund', notes: '' }); setTransactionId(''); setResult(null); }}
-                    className="mt-4 px-6 py-2 bg-rose-600 text-white text-sm font-medium rounded-xl hover:bg-rose-700 cursor-pointer">
-                    Make Another Donation
-                  </button>
-                </div>
-              )}
+              {/* Donate Button */}
+              <button type="submit" disabled={submitting || form.amount <= 0}
+                className="w-full py-4 bg-gradient-to-r from-rose-600 to-red-600 text-white font-bold rounded-2xl hover:from-rose-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl shadow-rose-500/30 text-sm cursor-pointer">
+                {submitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                    Redirecting to Payment...
+                  </span>
+                ) : (
+                  `Donate ${form.currency} ${form.amount > 0 ? form.amount.toLocaleString() : '...'} →`
+                )}
+              </button>
+
+              <p className="text-center text-[10px] text-slate-400 mt-2">
+                🔒 Secure payment processed by CashMaal. Your card details are never stored on our servers.
+              </p>
             </div>
-          </div>
-        </div>
-      </section>
+          )}
+        </form>
+      </main>
+    </div>
+  );
+}
 
-      <section className="py-14 bg-gradient-to-br from-rose-600 to-rose-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Heart className="w-10 h-10 mx-auto mb-3 opacity-80" />
-          <h2 className="text-2xl font-bold">Every Donation Saves a Life</h2>
-          <p className="text-rose-100 mt-2 max-w-xl mx-auto text-sm">
-            Your contribution directly funds cardiac consultations, medications, and surgeries for patients who cannot afford them.
-          </p>
-        </div>
-      </section>
+function DonationResult({ result, onReset }: { result: { status: string; transactionId?: string; amount?: string; currency?: string }; onReset: () => void }) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-blue-50/20 flex items-center justify-center px-4">
+      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/60 p-10 max-w-md w-full text-center">
+        {result.status === 'success' ? (
+          <>
+            <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Donation Successful!</h1>
+            <p className="text-sm text-slate-600 mb-6">Thank you for your generous donation to Heart Health Care Foundation.</p>
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 space-y-3 mb-6">
+              {result.amount && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Amount</span>
+                  <span className="font-bold text-emerald-700">{result.currency || 'PKR'} {parseFloat(result.amount).toLocaleString()}</span>
+                </div>
+              )}
+              {result.transactionId && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Transaction ID</span>
+                  <span className="font-mono font-bold text-slate-800">{result.transactionId}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Status</span>
+                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">Verified</span>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 mb-6">A confirmation has been sent to your email. Your donation will be used for cardiac patient treatment.</p>
+          </>
+        ) : result.status === 'failed' ? (
+          <>
+            <div className="w-20 h-20 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Payment Not Completed</h1>
+            <p className="text-sm text-slate-600 mb-6">Your payment was not completed or was rejected. You can try again.</p>
+          </>
+        ) : (
+          <>
+            <div className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Payment Cancelled</h1>
+            <p className="text-sm text-slate-600 mb-6">You cancelled the payment. No charges were made.</p>
+          </>
+        )}
+        <button onClick={onReset}
+          className="w-full py-3 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-700 transition-colors cursor-pointer text-sm">
+          {result.status === 'success' ? 'Make Another Donation' : 'Try Again'}
+        </button>
+      </div>
     </div>
   );
 }
