@@ -204,7 +204,24 @@ export function initializeDatabase(): void {
       payment_method TEXT DEFAULT 'Bank Transfer',
       project_sponsorship TEXT DEFAULT 'General Cardiac Fund',
       receipt_number TEXT DEFAULT '',
-      notes TEXT DEFAULT ''
+      notes TEXT DEFAULT '',
+      transaction_id TEXT DEFAULT '',
+      payment_status TEXT DEFAULT 'Pending' CHECK(payment_status IN ('Pending','Verified','Rejected')),
+      verified_by TEXT DEFAULT NULL,
+      verification_date TEXT DEFAULT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS foundation_accounts (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL CHECK(type IN ('Bank','EasyPaisa','JazzCash')),
+      bank_name TEXT DEFAULT '',
+      account_title TEXT DEFAULT '',
+      account_number TEXT DEFAULT '',
+      iban TEXT DEFAULT '',
+      branch_code TEXT DEFAULT '',
+      phone_number TEXT DEFAULT '',
+      is_active INTEGER DEFAULT 1,
+      display_order INTEGER DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS audit_logs (
@@ -219,4 +236,38 @@ export function initializeDatabase(): void {
   `);
 
   console.log('Database initialized successfully');
+
+  // Migration: add new columns if missing
+  try {
+    const cols = conn.prepare("PRAGMA table_info(donor_payments)").all() as any[];
+    const colNames = cols.map(c => c.name);
+    if (!colNames.includes('transaction_id')) {
+      conn.exec("ALTER TABLE donor_payments ADD COLUMN transaction_id TEXT DEFAULT ''");
+    }
+    if (!colNames.includes('payment_status')) {
+      conn.exec("ALTER TABLE donor_payments ADD COLUMN payment_status TEXT DEFAULT 'Pending'");
+    }
+    if (!colNames.includes('verified_by')) {
+      conn.exec("ALTER TABLE donor_payments ADD COLUMN verified_by TEXT DEFAULT NULL");
+    }
+    if (!colNames.includes('verification_date')) {
+      conn.exec("ALTER TABLE donor_payments ADD COLUMN verification_date TEXT DEFAULT NULL");
+    }
+  } catch (e) {
+    // Migration may already be done
+  }
+
+  // Seed foundation payment accounts if empty
+  try {
+    const count = (conn.prepare('SELECT COUNT(*) as c FROM foundation_accounts').get() as any).c;
+    if (count === 0) {
+      const insert = conn.prepare('INSERT INTO foundation_accounts (id, type, bank_name, account_title, account_number, iban, branch_code, phone_number, is_active, display_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+      insert.run('ACC-001', 'Bank', 'HBL (Habib Bank Limited)', 'Heart Health Care Foundation', '12345678901234', 'PK36SCBL0000001234567890', '0123', '', 1, 1);
+      insert.run('ACC-002', 'Bank', 'MCB (Muslim Commercial Bank)', 'Heart Health Care Foundation', '98765432109876', 'PK44MCBL0000009876543210', '0456', '', 1, 2);
+      insert.run('ACC-003', 'EasyPaisa', '', 'Heart Health Care Foundation', '', '', '', '0300-1234567', 1, 3);
+      insert.run('ACC-004', 'JazzCash', '', 'Heart Health Care Foundation', '', '', '', '0321-1234567', 1, 4);
+    }
+  } catch (e) {
+    // Table may not exist yet on old databases
+  }
 }
