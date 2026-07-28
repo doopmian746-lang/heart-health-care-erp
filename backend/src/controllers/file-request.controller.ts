@@ -12,6 +12,11 @@ export const fileRequestController = {
     res.json(fileRequestRepo.findAll());
   },
 
+  getByPatient(req: AuthRequest, res: Response): void {
+    const { patientId } = req.params;
+    res.json(fileRequestRepo.findByPatientId(patientId));
+  },
+
   create(req: AuthRequest, res: Response): void {
     const { patientId, purpose, urgency } = req.body;
     const patient = patientRepo.findById(patientId);

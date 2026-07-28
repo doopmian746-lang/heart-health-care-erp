@@ -32,7 +32,7 @@ export default function PatientManager({ onSelectPatient, onCreateConsultation, 
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search by name, ID, CNIC, or mobile..."
+              placeholder="Search by name, MR No, CNIC, or mobile..."
               className="w-full px-4 py-2.5 pl-10 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <svg className="absolute left-3 top-3 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,7 +48,7 @@ export default function PatientManager({ onSelectPatient, onCreateConsultation, 
                 <thead>
                   <tr className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                     <th className="text-left px-4 py-3">Patient</th>
-                    <th className="text-left px-4 py-3">Code</th>
+                    <th className="text-left px-4 py-3">MR No</th>
                     <th className="text-left px-4 py-3">CNIC</th>
                     <th className="text-left px-4 py-3">Mobile</th>
                     <th className="text-left px-4 py-3">Age/Gender</th>

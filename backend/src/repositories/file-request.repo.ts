@@ -27,6 +27,11 @@ export const fileRequestRepo = {
     return row ? rowToFileRequest(row) : undefined;
   },
 
+  findByPatientId(patientId: string): FileRequest[] {
+    const db = getDatabase();
+    return db.prepare('SELECT * FROM file_requests WHERE patient_id = ? ORDER BY request_date DESC').all(patientId).map(rowToFileRequest);
+  },
+
   create(req: FileRequest): void {
     const db = getDatabase();
     db.prepare(`

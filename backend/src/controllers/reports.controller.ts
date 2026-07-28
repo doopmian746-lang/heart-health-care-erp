@@ -202,6 +202,21 @@ export const reportsController = {
       consultationsByDoctor[c.doctorName] = (consultationsByDoctor[c.doctorName] || 0) + 1;
     });
 
+    const patientAssistanceSummary: Record<string, { patientName: string; patientId: string; requestCount: number; approvedCount: number; totalEstimated: number; totalFoundation: number; totalPatient: number }> = {};
+    assistanceInPeriod.forEach(a => {
+      const key = a.patientId;
+      if (!patientAssistanceSummary[key]) {
+        patientAssistanceSummary[key] = { patientName: a.patientName, patientId: a.patientId, requestCount: 0, approvedCount: 0, totalEstimated: 0, totalFoundation: 0, totalPatient: 0 };
+      }
+      const s = patientAssistanceSummary[key];
+      s.requestCount++;
+      if (a.status === 'Approved') s.approvedCount++;
+      s.totalEstimated += a.estimatedCost || 0;
+      s.totalFoundation += a.foundationContribution || 0;
+      s.totalPatient += a.patientContribution || 0;
+    });
+    const assistanceByPatient = Object.values(patientAssistanceSummary).sort((a, b) => b.totalFoundation - a.totalFoundation);
+
     res.json({
       period,
       dateRange: { start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] },
@@ -243,6 +258,7 @@ export const reportsController = {
       recentConsultations: consultationsInPeriod.slice(-10).reverse(),
       recentDonations: donationsInPeriod.slice(-10).reverse(),
       recentAssistance: assistanceInPeriod.slice(-10).reverse(),
+      assistanceByPatient,
     });
   },
 

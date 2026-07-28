@@ -46,6 +46,7 @@ interface ReportData {
   recentConsultations: any[];
   recentDonations: any[];
   recentAssistance: any[];
+  assistanceByPatient: { patientName: string; patientId: string; requestCount: number; approvedCount: number; totalEstimated: number; totalFoundation: number; totalPatient: number }[];
 }
 
 const inputClass = "w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
@@ -519,6 +520,50 @@ export default function ReportsAnalytics() {
                   {data.recentDonations.length === 0 && <p className="text-center text-xs text-slate-400 py-4">No donations this period</p>}
                 </div>
               </div>
+
+              {/* Per-Patient Foundation Contribution */}
+              {data.assistanceByPatient && data.assistanceByPatient.length > 0 && (
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                  <h4 className="font-bold text-sm text-slate-900 mb-1">Foundation Contributions by Patient</h4>
+                  <p className="text-[10px] text-slate-400 mb-4">How much the foundation has contributed per patient for treatment</p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase">
+                          <th className="text-left px-4 py-2">MR No</th>
+                          <th className="text-left px-4 py-2">Patient</th>
+                          <th className="text-center px-4 py-2">Requests</th>
+                          <th className="text-center px-4 py-2">Approved</th>
+                          <th className="text-right px-4 py-2">Total Estimated</th>
+                          <th className="text-right px-4 py-2">Foundation Paid</th>
+                          <th className="text-right px-4 py-2">Patient Paid</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {data.assistanceByPatient.map((p: any) => (
+                          <tr key={p.patientId} className="hover:bg-slate-50">
+                            <td className="px-4 py-2 font-mono text-xs text-slate-500">{p.patientId}</td>
+                            <td className="px-4 py-2 text-xs font-medium text-slate-700">{p.patientName}</td>
+                            <td className="px-4 py-2 text-center text-xs text-slate-600">{p.requestCount}</td>
+                            <td className="px-4 py-2 text-center text-xs text-emerald-600 font-medium">{p.approvedCount}</td>
+                            <td className="px-4 py-2 text-right text-xs text-slate-600">Rs. {p.totalEstimated.toLocaleString()}</td>
+                            <td className="px-4 py-2 text-right text-xs font-bold text-blue-700">Rs. {p.totalFoundation.toLocaleString()}</td>
+                            <td className="px-4 py-2 text-right text-xs text-slate-600">Rs. {p.totalPatient.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr className="bg-slate-50 font-bold">
+                          <td colSpan={4} className="px-4 py-2 text-xs text-slate-700">Total</td>
+                          <td className="px-4 py-2 text-right text-xs text-slate-700">Rs. {data.assistanceByPatient.reduce((s: number, p: any) => s + p.totalEstimated, 0).toLocaleString()}</td>
+                          <td className="px-4 py-2 text-right text-xs text-blue-700">Rs. {data.assistanceByPatient.reduce((s: number, p: any) => s + p.totalFoundation, 0).toLocaleString()}</td>
+                          <td className="px-4 py-2 text-right text-xs text-slate-700">Rs. {data.assistanceByPatient.reduce((s: number, p: any) => s + p.totalPatient, 0).toLocaleString()}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -6,6 +6,7 @@ import { validate, createFileRequestSchema } from '../middleware/validate.js';
 const router = Router();
 
 router.get('/', authenticateToken, fileRequestController.getAll);
+router.get('/patient/:patientId', authenticateToken, fileRequestController.getByPatient);
 router.post('/', authenticateToken, validate(createFileRequestSchema), fileRequestController.create);
 router.post('/:id/action', authenticateToken, requireRole('Admin', 'Doctor'), fileRequestController.action);
 

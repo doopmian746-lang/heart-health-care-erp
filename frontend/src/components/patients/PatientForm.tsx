@@ -131,7 +131,7 @@ export default function PatientForm({ onComplete, editPatient }: Props) {
       <div class="section">
         <h3>Basic Information</h3>
         <div class="grid">
-          <div class="field"><div class="label">Patient ID</div><div class="value">${savedId}</div></div>
+          <div class="field"><div class="label">MR No</div><div class="value">${savedId}</div></div>
           <div class="field"><div class="label">Full Name</div><div class="value">${form.fullName}</div></div>
           <div class="field"><div class="label">Father/Husband</div><div class="value">${form.fatherHusbandName || '-'}</div></div>
           <div class="field"><div class="label">CNIC</div><div class="value">${form.cnic || '-'}</div></div>
