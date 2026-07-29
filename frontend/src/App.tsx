@@ -15,6 +15,7 @@ import ReportsAnalytics from './components/reports/ReportsAnalytics';
 import DonorSponsorships from './components/sponsors/DonorSponsorships';
 import AuditLogs from './components/audit-logs/AuditLogs';
 import SystemStaff from './components/users/SystemStaff';
+import LabManagement from './components/lab/LabManagement';
 
 import PublicNavbar from './components/public/Navbar';
 import PublicFooter from './components/public/Footer';
@@ -76,6 +77,7 @@ function AppLayout() {
             <Route path="consultations" element={<ConsultationList />} />
             <Route path="prescriptions" element={<PrescriptionList />} />
             <Route path="pharmacy" element={<PharmacyInventory />} />
+            <Route path="lab" element={<LabManagement />} />
             <Route path="assistance" element={<AssistanceWorkflow />} />
             <Route path="file-requests" element={<FileRequestList />} />
             <Route path="reports" element={<ReportsAnalytics />} />

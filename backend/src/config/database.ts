@@ -253,9 +253,68 @@ export function initializeDatabase(): void {
     if (!colNames.includes('verification_date')) {
       conn.exec("ALTER TABLE donor_payments ADD COLUMN verification_date TEXT DEFAULT NULL");
     }
-  } catch (e) {
-    // Migration may already be done
-  }
+  } catch (e) {}
+
+  // Migration: add missing consultation columns
+  try {
+    const conCols = conn.prepare("PRAGMA table_info(consultations)").all() as any[];
+    const conColNames = conCols.map(c => c.name);
+    if (!conColNames.includes('investigations')) {
+      conn.exec("ALTER TABLE consultations ADD COLUMN investigations TEXT DEFAULT ''");
+    }
+    if (!conColNames.includes('procedures')) {
+      conn.exec("ALTER TABLE consultations ADD COLUMN procedures TEXT DEFAULT ''");
+    }
+    if (!conColNames.includes('referrals')) {
+      conn.exec("ALTER TABLE consultations ADD COLUMN referrals TEXT DEFAULT ''");
+    }
+    if (!conColNames.includes('requirements')) {
+      conn.exec("ALTER TABLE consultations ADD COLUMN requirements TEXT DEFAULT ''");
+    }
+    if (!conColNames.includes('foundation_referral')) {
+      conn.exec("ALTER TABLE consultations ADD COLUMN foundation_referral INTEGER DEFAULT 0");
+    }
+  } catch (e) {}
+
+  // Lab tables
+  conn.exec(`
+    CREATE TABLE IF NOT EXISTS lab_tests (
+      id TEXT PRIMARY KEY,
+      test_name TEXT NOT NULL,
+      category TEXT DEFAULT 'General',
+      description TEXT DEFAULT '',
+      normal_range TEXT DEFAULT '',
+      unit TEXT DEFAULT '',
+      cost REAL DEFAULT 0,
+      is_active INTEGER DEFAULT 1
+    );
+
+    CREATE TABLE IF NOT EXISTS lab_orders (
+      id TEXT PRIMARY KEY,
+      patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+      patient_name TEXT DEFAULT '',
+      consultation_id TEXT DEFAULT '',
+      doctor_name TEXT DEFAULT '',
+      status TEXT DEFAULT 'Pending' CHECK(status IN ('Pending','In Progress','Completed','Cancelled')),
+      priority TEXT DEFAULT 'Routine' CHECK(priority IN ('Routine','Urgent','STAT')),
+      order_date TEXT DEFAULT (datetime('now')),
+      notes TEXT DEFAULT ''
+    );
+
+    CREATE TABLE IF NOT EXISTS lab_order_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id TEXT NOT NULL REFERENCES lab_orders(id) ON DELETE CASCADE,
+      test_id TEXT NOT NULL,
+      test_name TEXT DEFAULT '',
+      result TEXT DEFAULT '',
+      result_value TEXT DEFAULT '',
+      unit TEXT DEFAULT '',
+      normal_range TEXT DEFAULT '',
+      status TEXT DEFAULT 'Pending' CHECK(status IN ('Pending','Completed','Abnormal')),
+      completed_date TEXT DEFAULT NULL,
+      technician TEXT DEFAULT ''
+    );
+  `);
 
   // Seed foundation payment accounts if empty
   try {

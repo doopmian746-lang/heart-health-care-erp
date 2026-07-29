@@ -234,3 +234,41 @@ export interface PaginatedResult<T> {
   limit: number;
   totalPages: number;
 }
+
+export interface LabTest {
+  id: string;
+  testName: string;
+  category: string;
+  description: string;
+  normalRange: string;
+  unit: string;
+  cost: number;
+  isActive: boolean;
+}
+
+export interface LabOrder {
+  id: string;
+  patientId: string;
+  patientName: string;
+  consultationId: string;
+  doctorName: string;
+  status: 'Pending' | 'In Progress' | 'Completed' | 'Cancelled';
+  priority: 'Routine' | 'Urgent' | 'STAT';
+  orderDate: string;
+  notes: string;
+  items?: LabOrderItem[];
+}
+
+export interface LabOrderItem {
+  id: number;
+  orderId: string;
+  testId: string;
+  testName: string;
+  result: string;
+  resultValue: string;
+  unit: string;
+  normalRange: string;
+  status: 'Pending' | 'Completed' | 'Abnormal';
+  completedDate: string | null;
+  technician: string;
+}

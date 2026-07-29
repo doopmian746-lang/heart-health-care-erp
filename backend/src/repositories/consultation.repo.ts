@@ -19,6 +19,11 @@ const rowToConsultation = (row: any): Consultation => ({
   examinationFindings: row.examination_findings,
   diagnosis: row.diagnosis,
   doctorNotes: row.doctor_notes,
+  investigations: row.investigations || '',
+  procedures: row.procedures || '',
+  referrals: row.referrals || '',
+  foundationReferral: !!row.foundation_referral,
+  requirements: row.requirements || '',
   followUpDate: row.follow_up_date,
   followUpInstructions: row.follow_up_instructions,
   doctorName: row.doctor_name,
@@ -45,16 +50,21 @@ export const consultationRepo = {
     const db = getDatabase();
     db.prepare(`
       INSERT INTO consultations (id, patient_id, visit_date, bp_systolic, bp_diastolic, pulse, weight, height, bmi, spo2,
-        chief_complaint, symptoms, examination_findings, diagnosis, doctor_notes, follow_up_date, follow_up_instructions, doctor_name)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        chief_complaint, symptoms, examination_findings, diagnosis, doctor_notes,
+        investigations, procedures, referrals, requirements, foundation_referral,
+        follow_up_date, follow_up_instructions, doctor_name)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       consultation.id, consultation.patientId, consultation.visitDate,
       consultation.vitals.bpSystolic, consultation.vitals.bpDiastolic,
       consultation.vitals.pulse, consultation.vitals.weight, consultation.vitals.height,
       consultation.vitals.bmi, consultation.vitals.spo2,
       consultation.chiefComplaint, consultation.symptoms, consultation.examinationFindings,
-      consultation.diagnosis, consultation.doctorNotes, consultation.followUpDate,
-      consultation.followUpInstructions, consultation.doctorName
+      consultation.diagnosis, consultation.doctorNotes,
+      consultation.investigations || '', consultation.procedures || '',
+      consultation.referrals || '', consultation.requirements || '',
+      consultation.foundationReferral ? 1 : 0,
+      consultation.followUpDate, consultation.followUpInstructions, consultation.doctorName
     );
   },
 

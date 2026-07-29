@@ -264,4 +264,37 @@ export function seedDatabase(): void {
   }
 
   console.log('Database seeded with initial data successfully');
+
+  // Seed lab tests if empty
+  try {
+    const labCount = (db.prepare('SELECT COUNT(*) as c FROM lab_tests').get() as any).c;
+    if (labCount === 0) {
+      const insertLab = db.prepare('INSERT INTO lab_tests (id, test_name, category, description, normal_range, unit, cost, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+      const labTests = [
+        ['LT-001', 'Complete Blood Count (CBC)', 'Hematology', 'Measures RBC, WBC, platelets, hemoglobin', 'WBC: 4-11, Hb: 12-16, Platelets: 150-400', '/μL, g/dL', 800],
+        ['LT-002', 'Fasting Lipid Profile', 'Biochemistry', 'Total cholesterol, LDL, HDL, triglycerides', 'TC: <200, LDL: <100, HDL: >40', 'mg/dL', 1200],
+        ['LT-003', 'HbA1c (Glycated Hemoglobin)', 'Biochemistry', 'Average blood sugar over 3 months', '<5.7%', '%', 1000],
+        ['LT-004', 'Renal Function Tests (RFT)', 'Biochemistry', 'Creatinine, BUN, electrolytes', 'Creatinine: 0.6-1.2, BUN: 7-20', 'mg/dL', 900],
+        ['LT-005', 'Liver Function Tests (LFT)', 'Biochemistry', 'ALT, AST, bilirubin, albumin', 'ALT: 7-56, AST: 10-40', 'U/L', 900],
+        ['LT-006', 'Thyroid Profile (TSH, T3, T4)', 'Endocrinology', 'Thyroid stimulating hormone and thyroid hormones', 'TSH: 0.4-4.0', 'mIU/L', 1500],
+        ['LT-007', 'Fasting Blood Glucose', 'Biochemistry', 'Blood sugar level after fasting', '70-100', 'mg/dL', 400],
+        ['LT-008', 'ECG (12-Lead)', 'Cardiology', 'Electrocardiogram - heart electrical activity', 'Normal sinus rhythm', '-', 1500],
+        ['LT-009', 'Echocardiography', 'Cardiology', 'Ultrasound of the heart', 'Normal LV function, EF >55%', '-', 5000],
+        ['LT-010', 'Chest X-Ray (PA View)', 'Radiology', 'X-ray of chest', 'Normal', '-', 2000],
+        ['LT-011', 'Urinalysis', 'Pathology', 'Routine urine examination', 'Normal', '-', 400],
+        ['LT-012', 'Troponin I', 'Cardiology', 'Cardiac biomarker for heart attack', '<0.04', 'ng/mL', 2500],
+        ['LT-013', 'BNP (B-type Natriuretic Peptide)', 'Cardiology', 'Heart failure marker', '<100', 'pg/mL', 3000],
+        ['LT-014', 'PT/INR (Coagulation)', 'Hematology', 'Blood clotting time', 'INR: 0.8-1.2', '-', 800],
+        ['LT-015', 'Serum Electrolytes', 'Biochemistry', 'Sodium, Potassium, Chloride', 'Na: 136-145, K: 3.5-5.0', 'mEq/L', 600],
+        ['LT-016', 'Treadmill Test (TMT)', 'Cardiology', 'Exercise stress test', 'Negative for ischemia', '-', 4000],
+        ['LT-017', 'Holter Monitoring', 'Cardiology', '24-hour heart rhythm monitoring', 'No significant arrhythmia', '-', 6000],
+        ['LT-018', 'Coronary Angiography', 'Cardiology', 'Imaging of coronary arteries', 'No significant stenosis', '-', 25000],
+        ['LT-019', 'CBC with Differential', 'Hematology', 'Detailed white blood cell count', 'Neutrophils: 40-70%, Lymphocytes: 20-40%', '%', 1000],
+        ['LT-020', 'CRP (C-Reactive Protein)', 'Pathology', 'Inflammation marker', '<3.0', 'mg/L', 700],
+      ];
+      for (const t of labTests) {
+        insertLab.run(t[0], t[1], t[2], t[3], t[4], t[5], t[6], 1);
+      }
+    }
+  } catch (e) {}
 }

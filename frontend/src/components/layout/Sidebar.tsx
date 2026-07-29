@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Users, HeartPulse, FileSpreadsheet, Pill, HandHeart, ShieldAlert, Settings, LogOut, ChevronLeft, ChevronRight, Activity, FileText, TrendingUp, Gift } from 'lucide-react';
+import { Home, Users, HeartPulse, FileSpreadsheet, Pill, HandHeart, ShieldAlert, Settings, LogOut, ChevronLeft, ChevronRight, Activity, FileText, TrendingUp, Gift, FlaskConical } from 'lucide-react';
 import { useAppStore } from '../../store/appStore';
 import { UserRole } from '../../types';
 
@@ -18,6 +18,7 @@ const menuItems: MenuItem[] = [
   { id: 'consultations', name: 'Consultations', icon: HeartPulse, path: '/app/consultations', roles: ['Admin', 'Doctor', 'Receptionist'] },
   { id: 'prescriptions', name: 'Prescriptions', icon: FileSpreadsheet, path: '/app/prescriptions', roles: ['Admin', 'Doctor', 'Pharmacy Staff'] },
   { id: 'pharmacy', name: 'Pharmacy Inventory', icon: Pill, path: '/app/pharmacy', roles: ['Admin', 'Pharmacy Staff', 'Doctor'] },
+  { id: 'lab', name: 'Laboratory', icon: FlaskConical, path: '/app/lab', roles: ['Admin', 'Doctor', 'Lab Staff'] },
   { id: 'assistance', name: 'Assistance Workflow', icon: HandHeart, path: '/app/assistance', roles: ['Admin', 'Doctor', 'Receptionist', 'Pharmacy Staff'] },
   { id: 'file-requests', name: 'File Requests', icon: FileText, path: '/app/file-requests', roles: ['Admin', 'Doctor', 'Receptionist'] },
   { id: 'reports', name: 'Reports & Analytics', icon: TrendingUp, path: '/app/reports', roles: ['Admin', 'Doctor', 'Receptionist', 'Pharmacy Staff'] },
