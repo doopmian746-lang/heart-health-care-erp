@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/appStore';
 import { FileRequest } from '../../types';
 
 const API_BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api';
 
 export default function FileRequestList() {
+  const navigate = useNavigate();
   const token = useAppStore(s => s.token);
   const patients = useAppStore(s => s.patients);
   const [requests, setRequests] = useState<FileRequest[]>([]);
@@ -186,13 +188,14 @@ export default function FileRequestList() {
                   <td className="px-4 py-3 text-xs text-slate-500">{r.requestedBy}</td>
                   <td className="px-4 py-3 text-xs text-slate-400">{new Date(r.requestDate).toLocaleDateString()}</td>
                   <td className="px-4 py-3 text-right">
-                    {r.status === 'Pending' && (
-                      <button onClick={() => setActionItem(r)}
-                        className="px-2.5 py-1.5 text-[10px] bg-blue-50 text-blue-700 font-medium rounded-lg hover:bg-blue-100 cursor-pointer">Review</button>
-                    )}
-                    {r.status === 'Fulfilled' && (
-                      <span className="text-[10px] text-slate-400">by {r.fulfilledBy || '—'}</span>
-                    )}
+                    <div className="flex items-center justify-end gap-1">
+                      <button onClick={() => navigate(`/app/patients/${r.patientId}`)}
+                        className="px-2 py-1.5 text-[10px] bg-slate-100 text-slate-600 font-medium rounded-lg hover:bg-slate-200 cursor-pointer">View Patient</button>
+                      {r.status === 'Pending' && (
+                        <button onClick={() => setActionItem(r)}
+                          className="px-2.5 py-1.5 text-[10px] bg-blue-50 text-blue-700 font-medium rounded-lg hover:bg-blue-100 cursor-pointer">Review</button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

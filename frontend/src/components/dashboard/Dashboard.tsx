@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, HeartPulse, Sparkles, ShieldAlert, Heart, ArrowRight } from 'lucide-react';
+import { Users, HeartPulse, Sparkles, ShieldAlert, Heart, ArrowRight, FlaskConical } from 'lucide-react';
 import { useAppStore } from '../../store/appStore';
 import { useApi } from '../../hooks/useApi';
 import { DashboardStats } from '../../types';
@@ -45,12 +45,13 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {[
           { label: 'Total Heart Patients', value: stats.totalPatients, icon: Users, color: 'blue', onClick: () => navigate('/app/patients') },
           { label: "Today's Visits", value: stats.todayConsultations, icon: HeartPulse, color: 'teal', onClick: () => navigate('/app/consultations') },
           { label: 'Pending Approvals', value: stats.pendingAssistance, icon: Sparkles, color: 'amber', onClick: () => navigate('/app/assistance') },
           { label: 'Low Stock Medicines', value: stats.lowStockMedicines, icon: ShieldAlert, color: 'rose', onClick: () => navigate('/app/pharmacy') },
+          { label: 'Pending Lab Tests', value: stats.lab.pending, icon: FlaskConical, color: 'blue', onClick: () => navigate('/app/lab') },
         ].map((kpi, i) => {
           const IconComponent = kpi.icon;
           return (

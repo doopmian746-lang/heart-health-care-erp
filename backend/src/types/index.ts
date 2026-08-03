@@ -177,7 +177,7 @@ export interface FoundationAssistance {
   approvalDate: string | null;
 }
 
-export type EntityType = 'Patient' | 'MedicalHistory' | 'Consultation' | 'Prescription' | 'Inventory' | 'Assistance' | 'Dispensing' | 'User' | 'Donor' | 'FileRequest';
+export type EntityType = 'Patient' | 'MedicalHistory' | 'Consultation' | 'Prescription' | 'Inventory' | 'Assistance' | 'Dispensing' | 'User' | 'Donor' | 'FileRequest' | 'LabTest' | 'LabOrder';
 
 export interface AuditLog {
   id: string;
@@ -225,6 +225,7 @@ export interface DashboardStats {
   monthlyRegistrations: { month: string; count: number }[];
   recentConsultations: Consultation[];
   pendingRequests: FoundationAssistance[];
+  lab: { pending: number; inProgress: number; completed: number; todayOrders: number; totalTests: number };
 }
 
 export interface PaginatedResult<T> {

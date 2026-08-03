@@ -17,6 +17,7 @@ const requiredDot = <span className="text-rose-500 ml-0.5">*</span>;
 const hintClass = "text-[10px] text-slate-400 mt-0.5";
 
 interface MedicineItem {
+  medicineId: string;
   medicineName: string;
   strength: string;
   dosage: string;
@@ -81,7 +82,7 @@ export default function ConsultationForm({ patientId, patientName, onSaved, onCa
     : '0.0';
 
   const addMedicine = () => {
-    setPrescription([...prescription, { medicineName: '', strength: '', dosage: '1 tablet', frequency: 'Once daily', duration: '', instructions: '', category: '', quantity: 1, unitPrice: 0 }]);
+    setPrescription([...prescription, { medicineId: '', medicineName: '', strength: '', dosage: '1 tablet', frequency: 'Once daily', duration: '', instructions: '', category: '', quantity: 1, unitPrice: 0 }]);
   };
 
   const updateMedicine = (i: number, field: keyof MedicineItem, value: string | number) => {
@@ -97,6 +98,7 @@ export default function ConsultationForm({ patientId, patientName, onSaved, onCa
   const autoFillFromInventory = (i: number, medicineName: string) => {
     const item = inventory.find(inv => inv.medicineName.toLowerCase() === medicineName.toLowerCase());
     if (item) {
+      updateMedicine(i, 'medicineId', item.id);
       updateMedicine(i, 'strength', item.medicineName.includes('mg') ? item.medicineName : '');
       updateMedicine(i, 'unitPrice', item.unitPrice);
       updateMedicine(i, 'category', item.category);
@@ -149,7 +151,7 @@ export default function ConsultationForm({ patientId, patientName, onSaved, onCa
           body: JSON.stringify({
             consultationId: consultation.id,
             items: prescription.filter(m => m.medicineName.trim()).map(m => ({
-              medicineId: '',
+              medicineId: m.medicineId || '',
               medicineName: m.medicineName,
               strength: m.strength,
               dosage: m.dosage,
@@ -161,6 +163,37 @@ export default function ConsultationForm({ patientId, patientName, onSaved, onCa
           }),
         });
         if (!presRes.ok) throw new Error('Failed to save prescription');
+      }
+
+      // Auto-create lab orders from investigations text
+      if (treatment.investigations.trim()) {
+        try {
+          const testRes = await fetch(`${API_BASE}/lab/tests`, { headers: { Authorization: `Bearer ${token}` } });
+          if (testRes.ok) {
+            const availableTests = await testRes.json();
+            const invLines = treatment.investigations.split('\n').map(l => l.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);
+            const matchedTests: string[] = [];
+            for (const line of invLines) {
+              const lower = line.toLowerCase();
+              const match = availableTests.find((t: any) => lower.includes(t.testName.toLowerCase()) || t.testName.toLowerCase().includes(lower));
+              if (match && !matchedTests.includes(match.id)) matchedTests.push(match.id);
+            }
+            if (matchedTests.length > 0) {
+              await fetch(`${API_BASE}/lab/orders`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({
+                  patientId,
+                  consultationId: consultation.id,
+                  doctorName: consultation.doctorName,
+                  priority: 'Routine',
+                  notes: `Auto-created from consultation ${consultation.id}`,
+                  testIds: matchedTests,
+                }),
+              });
+            }
+          }
+        } catch { /* Lab order creation is best-effort */ }
       }
 
       onSaved();

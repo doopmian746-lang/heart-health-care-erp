@@ -3,6 +3,7 @@ import { patientRepo } from '../repositories/patient.repo.js';
 import { consultationRepo } from '../repositories/consultation.repo.js';
 import { prescriptionRepo } from '../repositories/prescription.repo.js';
 import { assistanceRepo } from '../repositories/assistance.repo.js';
+import { labRepo } from '../repositories/lab.repo.js';
 import { Patient } from '../types/index.js';
 import { getDatabase } from '../config/database.js';
 import { generatePatientId, generatePatientCode } from '../utils/id-generator.js';
@@ -41,7 +42,8 @@ export const patientController = {
     const consultations = consultationRepo.findByPatientId(patient.id);
     const prescriptions = prescriptionRepo.findByPatientId(patient.id);
     const assistances = assistanceRepo.findByPatientId(patient.id);
-    res.json({ patient, medicalHistory, consultations, prescriptions, assistanceHistory: assistances });
+    const labOrders = labRepo.findByPatientId(patient.id);
+    res.json({ patient, medicalHistory, consultations, prescriptions, assistanceHistory: assistances, labOrders });
   },
 
   create(req: AuthRequest, res: Response): void {

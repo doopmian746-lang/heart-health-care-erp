@@ -30,12 +30,34 @@ export default function PrescriptionList() {
 
   const handleApprove = async (id: string, newStatus: 'Dispensed' | 'Partially Dispensed') => {
     try {
-      const res = await fetch(`${API_BASE}/prescriptions/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      if (!res.ok) throw new Error('Failed to update');
+      if (newStatus === 'Dispensed') {
+        const rx = prescriptions.find(p => p.id === id);
+        if (rx) {
+          const items = rx.items
+            .filter((it: any) => it.medicineId)
+            .map((it: any) => ({ medicineId: it.medicineId, quantityIssued: '1' }));
+          if (items.length > 0) {
+            await fetch(`${API_BASE}/pharmacy/dispense/${id}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+              body: JSON.stringify({ items, paymentStatus: 'Fully Paid' }),
+            });
+          } else {
+            await fetch(`${API_BASE}/prescriptions/${id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+              body: JSON.stringify({ status: newStatus }),
+            });
+          }
+        }
+      } else {
+        const res = await fetch(`${API_BASE}/prescriptions/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        if (!res.ok) throw new Error('Failed to update');
+      }
       fetchPrescriptions();
       if (selected?.id === id) {
         setSelected({ ...selected!, status: newStatus });

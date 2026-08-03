@@ -28,6 +28,7 @@ export interface CashMaalVerifyResponse {
   addi_info: string;
   sender_details: string;
   trx_details: string;
+  currency?: string;
 }
 
 export const cashMaalService = {

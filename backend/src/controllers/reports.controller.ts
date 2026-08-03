@@ -54,7 +54,7 @@ function filterByDate<T extends { date?: string; visitDate?: string; registratio
   dateField: keyof T = 'date'
 ): T[] {
   return items.filter(item => {
-    const dateStr = item[dateField] || item.visitDate || item.registrationDate || item.paymentDate || item.requestDate || item.createdAt;
+    const dateStr = (item[dateField] || item.visitDate || item.registrationDate || item.paymentDate || item.requestDate || item.createdAt) as string;
     if (!dateStr) return false;
     const itemDate = new Date(dateStr);
     return itemDate >= start && itemDate <= end;

@@ -10,7 +10,7 @@ interface Props {
   onBack: () => void;
 }
 
-type Tab = 'overview' | 'consultations' | 'prescriptions' | 'assistance' | 'files';
+type Tab = 'overview' | 'consultations' | 'prescriptions' | 'lab-orders' | 'assistance' | 'files';
 
 export default function PatientDetail({ patientId, onBack }: Props) {
   const token = useAppStore(s => s.token);
@@ -40,7 +40,7 @@ export default function PatientDetail({ patientId, onBack }: Props) {
   if (fetchError) return <div className="text-center py-10 text-rose-500">{fetchError}</div>;
   if (!data) return <div className="text-center py-10 text-rose-500">Patient not found</div>;
 
-  const { patient, medicalHistory, consultations, prescriptions, assistanceHistory } = data;
+  const { patient, medicalHistory, consultations, prescriptions, assistanceHistory, labOrders } = data;
   const se = patient.socioEconomic;
 
   const approvedAssistance = assistanceHistory.filter(a => a.status === 'Approved');
@@ -52,6 +52,7 @@ export default function PatientDetail({ patientId, onBack }: Props) {
     { id: 'overview', label: 'Overview', count: 0 },
     { id: 'consultations', label: 'Consultations', count: consultations.length },
     { id: 'prescriptions', label: 'Prescriptions', count: prescriptions.length },
+    { id: 'lab-orders', label: 'Lab Orders', count: labOrders?.length || 0 },
     { id: 'assistance', label: 'Foundation Aid', count: assistanceHistory.length },
     { id: 'files', label: 'File Requests', count: fileRequests.length },
   ];
@@ -326,6 +327,42 @@ export default function PatientDetail({ patientId, onBack }: Props) {
             </table>
           </div>
           {prescriptions.length === 0 && <div className="text-center py-10 text-sm text-slate-400">No prescriptions found.</div>}
+        </div>
+      )}
+
+      {activeTab === 'lab-orders' && (
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="text-left px-4 py-3">Order ID</th>
+                  <th className="text-left px-4 py-3">Doctor</th>
+                  <th className="text-center px-4 py-3">Tests</th>
+                  <th className="text-left px-4 py-3">Priority</th>
+                  <th className="text-left px-4 py-3">Status</th>
+                  <th className="text-left px-4 py-3">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {(labOrders || []).map(o => (
+                  <tr key={o.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-slate-500">{o.id}</td>
+                    <td className="px-4 py-3 text-xs font-medium text-slate-700">{o.doctorName || '—'}</td>
+                    <td className="px-4 py-3 text-center text-xs text-slate-600">{o.items?.length || 0}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-0.5 text-[9px] font-bold rounded-full ${o.priority === 'STAT' ? 'bg-rose-100 text-rose-700' : o.priority === 'Urgent' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>{o.priority}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-0.5 text-[9px] font-bold rounded-full ${o.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' : o.status === 'In Progress' ? 'bg-purple-100 text-purple-700' : o.status === 'Cancelled' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>{o.status}</span>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-400">{new Date(o.orderDate).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {(!labOrders || labOrders.length === 0) && <div className="text-center py-10 text-sm text-slate-400">No lab orders.</div>}
         </div>
       )}
 

@@ -221,6 +221,7 @@ export interface DashboardStats {
   monthlyRegistrations: { month: string; count: number }[];
   recentConsultations: Consultation[];
   pendingRequests: FoundationAssistance[];
+  lab: { pending: number; inProgress: number; completed: number; todayOrders: number; totalTests: number };
 }
 
 export interface PatientDetailResponse {
@@ -229,6 +230,7 @@ export interface PatientDetailResponse {
   consultations: Consultation[];
   prescriptions: Prescription[];
   assistanceHistory: FoundationAssistance[];
+  labOrders: LabOrder[];
 }
 
 export interface LabTest {

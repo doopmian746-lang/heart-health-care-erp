@@ -3,6 +3,7 @@ import { patientRepo } from '../repositories/patient.repo.js';
 import { consultationRepo } from '../repositories/consultation.repo.js';
 import { inventoryRepo } from '../repositories/inventory.repo.js';
 import { assistanceRepo } from '../repositories/assistance.repo.js';
+import { labRepo } from '../repositories/lab.repo.js';
 import { DashboardStats } from '../types/index.js';
 
 export const dashboardController = {
@@ -11,6 +12,7 @@ export const dashboardController = {
     const consultations = consultationRepo.findAll();
     const inventory = inventoryRepo.findAll();
     const assistance = assistanceRepo.findAll();
+    const labStats = labRepo.getStats();
 
     const todayStr = new Date().toISOString().split('T')[0];
     const todayConsultations = consultations.filter(c => c.visitDate.startsWith(todayStr));
@@ -32,6 +34,7 @@ export const dashboardController = {
       })(),
       recentConsultations: consultations.slice(0, 5),
       pendingRequests: assistance.filter(r => r.status === 'Pending').slice(0, 5),
+      lab: labStats,
     };
 
     res.json(stats);
