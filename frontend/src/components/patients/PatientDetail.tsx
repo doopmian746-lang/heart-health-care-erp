@@ -84,7 +84,7 @@ export default function PatientDetail({ patientId, onBack }: Props) {
         @media print { body { padding: 10px; } }
       </style></head><body>
       <div class="header">
-        <h1>Heart Health Care Foundation</h1>
+        <h1>Healing Hearts Foundation</h1>
         <p>Patient Medical File — ${patient.fullName}</p>
         <p>MR No: ${patient.patientCode || patient.id} · Generated: ${new Date().toLocaleDateString()}</p>
       </div>
@@ -110,7 +110,7 @@ export default function PatientDetail({ patientId, onBack }: Props) {
       ${consultations.length > 0 ? `<h3>Consultations (${consultations.length})</h3><table><thead><tr><th>Date</th><th>Doctor</th><th>Diagnosis</th><th>Complaint</th></tr></thead><tbody>${consultRows}</tbody></table>` : ''}
       ${prescriptions.length > 0 ? `<h3>Prescriptions (${prescriptions.length})</h3><table><thead><tr><th>Date</th><th>Doctor</th><th>Medicines</th><th>Status</th></tr></thead><tbody>${rxRows}</tbody></table>` : ''}
       ${assistanceHistory.length > 0 ? `<h3>Foundation Assistance (${assistanceHistory.length})</h3><table><thead><tr><th>Date</th><th>Type</th><th>Estimated</th><th>Foundation</th><th>Status</th></tr></thead><tbody>${assistRows}</tbody></table>` : ''}
-      <div class="footer">Heart Health Care Foundation — Patient Medical Record</div>
+      <div class="footer">Healing Hearts Foundation — Patient Medical Record</div>
       <script>window.onload=function(){window.print();}</script>
       </body></html>`);
     printWindow.document.close();

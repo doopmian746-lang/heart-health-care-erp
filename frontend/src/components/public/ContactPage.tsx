@@ -17,9 +17,9 @@ export default function ContactPage() {
               <h2 className="text-2xl font-bold text-slate-900 mb-6">Get in Touch</h2>
               <div className="space-y-6">
                 {[
-                  { icon: MapPin, title: 'Address', lines: ['Heart Health Care Foundation', 'Chiniot, Punjab, Pakistan'] },
+                  { icon: MapPin, title: 'Address', lines: ['Healing Hearts Foundation', 'Chiniot, Punjab, Pakistan'] },
                   { icon: Phone, title: 'Phone', lines: ['+92-XXX-XXXXXXX', '+92-YYY-YYYYYYY'] },
-                  { icon: Mail, title: 'Email', lines: ['info@heartfoundation.org', 'donate@heartfoundation.org'] },
+                  { icon: Mail, title: 'Email', lines: ['info@healinghearts.org', 'donate@healinghearts.org'] },
                   { icon: Clock, title: 'Working Hours', lines: ['Monday - Saturday: 9:00 AM - 5:00 PM', 'Sunday: Closed (Emergency Only)'] },
                 ].map((item, i) => {
                   const Icon = item.icon;

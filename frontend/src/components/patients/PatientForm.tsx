@@ -124,7 +124,7 @@ export default function PatientForm({ onComplete, editPatient }: Props) {
         @media print { body { padding: 10px; } }
       </style></head><body>
       <div class="header">
-        <h1>Heart Health Care Foundation</h1>
+        <h1>Healing Hearts Foundation</h1>
         <p>Patient Registration Card</p>
         <p>Date: ${new Date().toLocaleDateString()}</p>
       </div>
@@ -146,7 +146,7 @@ export default function PatientForm({ onComplete, editPatient }: Props) {
         </div>
         <div class="field" style="margin-top:8px"><div class="label">Address</div><div class="value">${form.address || '-'}</div></div>
       </div>
-      <div class="footer">Heart Health Care Foundation — Patient Registration Record</div>
+      <div class="footer">Healing Hearts Foundation — Patient Registration Record</div>
       <script>window.onload=function(){window.print();}</script>
       </body></html>`);
     printWindow.document.close();

@@ -192,7 +192,7 @@ function ConsultationDetail({ consultation: c, onBack }: { consultation: Consult
         @media print { body { padding: 10px; } }
       </style></head><body>
       <div class="header">
-        <h1>Heart Health Care Foundation</h1>
+        <h1>Healing Hearts Foundation</h1>
         <p>Consultation Report</p>
         <p>ID: ${c.id} · Patient: ${c.patientId} · Doctor: ${c.doctorName} · Date: ${new Date(c.visitDate).toLocaleDateString()}</p>
       </div>
@@ -208,7 +208,7 @@ function ConsultationDetail({ consultation: c, onBack }: { consultation: Consult
       <h3>Clinical Details</h3>
       ${fieldRows}
       ${c.followUpDate ? `<div style="margin-top:8px"><div style="font-size:9px;color:#9ca3af;text-transform:uppercase">Follow-up Date</div><div style="font-size:11px;margin-top:2px;font-weight:600">${new Date(c.followUpDate).toLocaleDateString()}</div></div>` : ''}
-      <div class="footer">Heart Health Care Foundation — Consultation Record</div>
+      <div class="footer">Healing Hearts Foundation — Consultation Record</div>
       <script>window.onload=function(){window.print();}</script>
       </body></html>`);
     printWindow.document.close();

@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Heart, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { LogoMark } from './Logo';
 
 export default function PublicNavbar() {
   const [open, setOpen] = useState(false);
@@ -15,20 +16,21 @@ export default function PublicNavbar() {
   ];
 
   return (
-    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="p-1.5 bg-rose-600 rounded-lg">
-              <Heart className="w-5 h-5 text-white" />
+          <Link to="/" className="flex items-center gap-2.5">
+            <LogoMark className="w-9 h-9" />
+            <div className="leading-tight">
+              <span className="font-bold text-base text-slate-900 block">Healing Hearts</span>
+              <span className="text-[10px] text-blue-700 font-semibold uppercase tracking-widest">Foundation</span>
             </div>
-            <span className="font-bold text-lg text-slate-900">Heart Health Care Foundation</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
             {links.map(l => (
               <Link key={l.to} to={l.to}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === l.to ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === l.to ? 'bg-rose-50 text-rose-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
                 {l.label}
               </Link>
             ))}
@@ -47,7 +49,7 @@ export default function PublicNavbar() {
         <div className="md:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-1">
           {links.map(l => (
             <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
-              className={`block px-3 py-2 rounded-lg text-sm font-medium ${location.pathname === l.to ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`}>
+              className={`block px-3 py-2 rounded-lg text-sm font-medium ${location.pathname === l.to ? 'bg-rose-50 text-rose-700' : 'text-slate-600 hover:bg-slate-50'}`}>
               {l.label}
             </Link>
           ))}

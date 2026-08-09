@@ -46,7 +46,7 @@ export default function LoginView() {
           <div className="inline-flex items-center justify-center p-3.5 bg-rose-500/10 text-rose-500 rounded-2xl border border-rose-500/20 mb-4">
             <HeartPulse className="w-8 h-8 animate-pulse" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Heart Health Care Foundation</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white">Healing Hearts Foundation</h1>
           <p className="text-sm text-slate-400 mt-1.5">ERP — Patient Management System</p>
         </div>
 

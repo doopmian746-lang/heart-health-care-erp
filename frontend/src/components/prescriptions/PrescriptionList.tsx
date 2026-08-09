@@ -177,7 +177,7 @@ function PrescriptionDetail({ prescription: p, onBack, onApprove, canApprove }: 
         @media print { body { padding: 10px; } }
       </style></head><body>
       <div class="header">
-        <h1>Heart Health Care Foundation</h1>
+        <h1>Healing Hearts Foundation</h1>
         <p>Prescription — ${p.id}</p>
         <p>Patient: ${p.patientId} · Doctor: ${p.doctorName || '—'} · Date: ${new Date(p.date).toLocaleDateString()}</p>
       </div>
@@ -188,7 +188,7 @@ function PrescriptionDetail({ prescription: p, onBack, onApprove, canApprove }: 
       </table>
       ${p.lifestyleRecommendations ? `<h3>Lifestyle Recommendations</h3><p style="font-size:11px">${p.lifestyleRecommendations}</p>` : ''}
       <h3>Status</h3><p style="font-size:11px;font-weight:600">${p.status}</p>
-      <div class="footer">Heart Health Care Foundation — Prescription Record</div>
+      <div class="footer">Healing Hearts Foundation — Prescription Record</div>
       <script>window.onload=function(){window.print();}</script>
       </body></html>`);
     printWindow.document.close();

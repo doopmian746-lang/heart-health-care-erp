@@ -98,7 +98,7 @@ export default function DonationsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-slate-900">Make a Donation</h1>
-              <p className="text-sm text-slate-500">Heart Health Care Foundation</p>
+              <p className="text-sm text-slate-500">Healing Hearts Foundation</p>
             </div>
           </div>
           <p className="text-sm text-slate-600 max-w-lg mx-auto">Your generous donation helps us provide life-saving cardiac care to patients in need across Pakistan.</p>
@@ -262,7 +262,7 @@ function DonationResult({ result, onReset }: { result: { status: string; transac
               <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
             </div>
             <h1 className="text-2xl font-bold text-slate-900 mb-2">Donation Successful!</h1>
-            <p className="text-sm text-slate-600 mb-6">Thank you for your generous donation to Heart Health Care Foundation.</p>
+            <p className="text-sm text-slate-600 mb-6">Thank you for your generous donation to Healing Hearts Foundation.</p>
             <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 space-y-3 mb-6">
               {result.amount && (
                 <div className="flex justify-between text-sm">

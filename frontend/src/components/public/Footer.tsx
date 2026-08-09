@@ -1,4 +1,5 @@
 import { Heart } from 'lucide-react';
+import { LogoMark } from './Logo';
 
 export default function PublicFooter() {
   return (
@@ -6,17 +7,32 @@ export default function PublicFooter() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-1.5 bg-rose-600 rounded-lg">
-                <Heart className="w-5 h-5 text-white" />
+            <div className="flex items-center gap-2.5 mb-4">
+              <LogoMark className="w-9 h-9" />
+              <div className="leading-tight">
+                <span className="font-bold text-base text-white block">Healing Hearts</span>
+                <span className="text-[10px] text-blue-400 font-semibold uppercase tracking-widest">Foundation</span>
               </div>
-              <span className="font-bold text-lg text-white">Heart Health Care Foundation</span>
             </div>
             <p className="text-sm leading-relaxed max-w-md">
-              Dedicated to providing quality cardiac healthcare to underserved communities. 
-              Every patient deserves access to life-saving heart treatment regardless of their 
-              financial circumstances.
+              Dedicated to providing quality cardiac healthcare to underserved communities.
+              Every patient deserves access to life-saving heart treatment regardless of their
+              financial circumstances. Every Heart Matters. Every Life Matters.
             </p>
+            <div className="flex items-center gap-4 mt-4">
+              <span className="text-xs text-slate-500 flex items-center gap-1">
+                <Heart className="w-3 h-3 text-rose-500" /> WE CARE
+              </span>
+              <span className="text-xs text-slate-500 flex items-center gap-1">
+                <Heart className="w-3 h-3 text-rose-500" /> WE TREAT
+              </span>
+              <span className="text-xs text-slate-500 flex items-center gap-1">
+                <Heart className="w-3 h-3 text-rose-500" /> WE SUPPORT
+              </span>
+              <span className="text-xs text-slate-500 flex items-center gap-1">
+                <Heart className="w-3 h-3 text-rose-500" /> WE SAVE LIVES
+              </span>
+            </div>
           </div>
 
           <div>
@@ -34,13 +50,18 @@ export default function PublicFooter() {
             <ul className="space-y-2 text-sm">
               <li>Chiniot, Punjab, Pakistan</li>
               <li>+92-XXX-XXXXXXX</li>
-              <li>info@heartfoundation.org</li>
+              <li>info@healinghearts.org</li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-slate-800 mt-8 pt-8 text-center text-xs text-slate-500">
-          &copy; {new Date().getFullYear()} Heart Health Care Foundation. All rights reserved.
+        <div className="border-t border-slate-800 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-slate-500">
+            &copy; {new Date().getFullYear()} Healing Hearts Foundation. All rights reserved.
+          </p>
+          <p className="text-xs text-slate-500 flex items-center gap-1">
+            <Heart className="w-3 h-3 text-rose-500" /> Every Heart Matters. Every Life Matters.
+          </p>
         </div>
       </div>
     </footer>
