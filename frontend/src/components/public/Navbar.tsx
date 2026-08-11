@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Heart } from 'lucide-react';
 import { useState } from 'react';
+import { LogoMark } from './Logo';
 
 export default function PublicNavbar() {
   const [open, setOpen] = useState(false);
@@ -8,53 +9,58 @@ export default function PublicNavbar() {
 
   const links = [
     { to: '/', label: 'Home' },
-    { to: '/about', label: 'About Us' },
+    { to: '/about', label: 'About' },
     { to: '/team', label: 'Our Team' },
-    { to: '/donations', label: 'Donations' },
+    { to: '/donations', label: 'Donate', highlight: true },
     { to: '/contact', label: 'Contact' },
   ];
 
   return (
-    <nav className="bg-white border-b border-[#e5e7eb] sticky top-0 z-50">
+    <nav className="bg-white border-b border-[#0B2A4A]/10 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#c41e3a] rounded-full flex items-center justify-center">
-              <Heart className="w-4 h-4 text-white" />
-            </div>
+          <Link to="/" className="flex items-center gap-2.5">
+            <LogoMark className="w-9 h-9" />
             <div className="leading-none">
-              <span className="font-bold text-sm text-[#1e3a5f] block">Healing Hearts</span>
-              <span className="text-[8px] text-[#c41e3a] font-semibold uppercase tracking-[0.2em]">Foundation</span>
+              <span className="font-bold text-sm text-[#0B2A4A] block tracking-tight">Healing Hearts</span>
+              <span className="text-[8px] text-[#D71920] font-bold uppercase tracking-[0.25em]">Foundation</span>
             </div>
           </Link>
 
           <div className="hidden md:flex items-center gap-0.5">
             {links.map(l => (
-              <Link key={l.to} to={l.to}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${location.pathname === l.to ? 'bg-[#c41e3a]/10 text-[#c41e3a]' : 'text-[#475569] hover:bg-[#f1f5f9] hover:text-[#1e3a5f]'}`}>
-                {l.label}
-              </Link>
+              l.highlight ? (
+                <Link key={l.to} to={l.to}
+                  className="ml-2 px-5 py-2 bg-[#D71920] text-white text-sm font-semibold rounded-lg hover:bg-[#b8141a] transition-all duration-300 shadow-md shadow-[#D71920]/20 flex items-center gap-1.5">
+                  <Heart className="w-3.5 h-3.5" /> {l.label}
+                </Link>
+              ) : (
+                <Link key={l.to} to={l.to}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === l.to ? 'bg-[#0B2A4A]/5 text-[#0B2A4A]' : 'text-[#475569] hover:bg-[#F7F9FC] hover:text-[#0B2A4A]'}`}>
+                  {l.label}
+                </Link>
+              )
             ))}
-            <Link to="/login" className="ml-3 px-4 py-2 bg-[#1e3a5f] text-white text-sm font-medium rounded-lg hover:bg-[#152d4a] transition-colors">
+            <Link to="/login" className="ml-3 px-4 py-2 bg-[#0B2A4A] text-white text-sm font-medium rounded-lg hover:bg-[#091f38] transition-colors">
               Staff Login
             </Link>
           </div>
 
-          <button onClick={() => setOpen(!open)} className="md:hidden p-2 rounded-lg hover:bg-[#f1f5f9]">
-            {open ? <X className="w-5 h-5 text-[#1e3a5f]" /> : <Menu className="w-5 h-5 text-[#1e3a5f]" />}
+          <button onClick={() => setOpen(!open)} className="md:hidden p-2 rounded-lg hover:bg-[#F7F9FC]">
+            {open ? <X className="w-5 h-5 text-[#0B2A4A]" /> : <Menu className="w-5 h-5 text-[#0B2A4A]" />}
           </button>
         </div>
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-[#e5e7eb] bg-white px-4 py-3 space-y-1">
+        <div className="md:hidden border-t border-[#0B2A4A]/10 bg-white px-4 py-3 space-y-1 shadow-lg">
           {links.map(l => (
             <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
-              className={`block px-3 py-2 rounded-lg text-sm font-medium ${location.pathname === l.to ? 'bg-[#c41e3a]/10 text-[#c41e3a]' : 'text-[#475569] hover:bg-[#f1f5f9]'}`}>
+              className={`block px-3 py-2.5 rounded-lg text-sm font-medium ${l.highlight ? 'bg-[#D71920] text-white text-center mt-2' : location.pathname === l.to ? 'bg-[#0B2A4A]/5 text-[#0B2A4A]' : 'text-[#475569] hover:bg-[#F7F9FC]'}`}>
               {l.label}
             </Link>
           ))}
-          <Link to="/login" onClick={() => setOpen(false)} className="block px-3 py-2 bg-[#1e3a5f] text-white text-sm font-medium rounded-lg text-center mt-2">
+          <Link to="/login" onClick={() => setOpen(false)} className="block px-3 py-2.5 bg-[#0B2A4A] text-white text-sm font-medium rounded-lg text-center mt-2">
             Staff Login
           </Link>
         </div>

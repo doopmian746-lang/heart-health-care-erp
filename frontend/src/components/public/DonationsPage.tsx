@@ -93,12 +93,12 @@ export default function DonationsPage() {
       <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
         <div className="max-w-2xl mx-auto px-4 py-6 text-center">
           <div className="inline-flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center shadow-lg shadow-rose-500/30">
+            <div className="w-12 h-12 rounded-2xl bg-[#D71920] flex items-center justify-center shadow-lg shadow-[#D71920]/30">
               <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Make a Donation</h1>
-              <p className="text-sm text-slate-500">Healing Hearts Foundation</p>
+              <h1 className="text-2xl font-bold text-[#0B2A4A]">Make a Donation</h1>
+              <p className="text-sm text-[#D71920] font-medium">Healing Hearts Foundation</p>
             </div>
           </div>
           <p className="text-sm text-slate-600 max-w-lg mx-auto">Your generous donation helps us provide life-saving cardiac care to patients in need across Pakistan.</p>
