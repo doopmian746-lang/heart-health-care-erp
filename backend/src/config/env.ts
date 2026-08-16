@@ -15,7 +15,7 @@ function requireEnv(key: string): string {
 const isProd = process.env.NODE_ENV === 'production';
 
 const defaultDbPath = isProd
-  ? '/tmp/data/heart_erp.db'
+  ? '/data/heart_erp.db'
   : path.resolve(process.cwd(), '../data/heart_erp.db');
 
 export const env = {
@@ -30,5 +30,5 @@ export const env = {
   CASHMAAL_IPN_KEY: process.env.CASHMAAL_IPN_KEY || '',
   CASHMAAL_PAYOUT_KEY: process.env.CASHMAAL_PAYOUT_KEY || '',
   SITE_URL: process.env.SITE_URL || 'https://heart-health-care-erp.vercel.app',
-  BACKEND_URL: process.env.BACKEND_URL || 'https://web-production-d7657.up.railway.app',
+  BACKEND_URL: process.env.BACKEND_URL || 'https://heart-health-care-erp.vercel.app',
 };
