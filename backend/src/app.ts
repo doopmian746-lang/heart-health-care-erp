@@ -50,6 +50,7 @@ app.use(helmet({
 app.use(cors({
   origin: [
     'https://heart-health-care-erp.vercel.app',
+    'https://heart-health-care-erp.onrender.com',
     process.env.RENDER_EXTERNAL_URL || '',
     'http://localhost:5173',
     'http://localhost:3000',
