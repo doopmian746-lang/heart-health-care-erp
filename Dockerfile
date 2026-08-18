@@ -1,11 +1,11 @@
 FROM node:20-slim
 
-WORKDIR /app
+WORKDIR /app/backend
 
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm install
 
-COPY . .
+COPY backend/ ./
 RUN npm run build
 
 EXPOSE 3000
