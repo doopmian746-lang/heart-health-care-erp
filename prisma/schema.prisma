@@ -1,0 +1,330 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  name         String
+  role         String
+  passwordHash String   @map("password_hash")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Patient {
+  id                      String   @id @default(cuid())
+  patientCode             String   @unique @map("patient_code")
+  fullName                String   @map("full_name")
+  fatherHusbandName       String   @default("") @map("father_husband_name")
+  cnic                    String   @default("")
+  dob                     String   @default("")
+  age                     Int      @default(0)
+  gender                  String   @default("Male")
+  maritalStatus           String   @default("Single") @map("marital_status")
+  occupation              String   @default("")
+  mobile                  String   @default("")
+  alternateContact        String   @default("") @map("alternate_contact")
+  address                 String   @default("")
+  bloodGroup              String   @default("Unknown") @map("blood_group")
+  photo                   String   @default("")
+  referredBy              String   @default("") @map("referred_by")
+  registrationDate        DateTime @default(now()) @map("registration_date")
+  createdBy               String?  @map("created_by")
+
+  housingStatus           String   @default("Owned") @map("housing_status")
+  houseType               String   @default("House") @map("house_type")
+  numberOfRooms           Int      @default(0) @map("number_of_rooms")
+  monthlyRent             Float    @default(0) @map("monthly_rent")
+  ownsLand                Boolean  @default(false) @map("owns_land")
+  landAcres               Float    @default(0) @map("land_acres")
+  monthlyElectricityBill   Float    @default(0) @map("monthly_electricity_bill")
+  waterSource             String   @default("Tap") @map("water_source")
+  toiletType              String   @default("Flush") @map("toilet_type")
+  cookingFuel             String   @default("Gas") @map("cooking_fuel")
+  monthlyHouseholdIncome  Float    @default(0) @map("monthly_household_income")
+  numberOfDependents      Int      @default(0) @map("number_of_dependents")
+  numberOfEarningMembers  Int      @default(0) @map("number_of_earning_members")
+  educationLevel          String   @default("None") @map("education_level")
+  employmentStatus        String   @default("Unemployed") @map("employment_status")
+  hasRefrigerator         Boolean  @default(false) @map("has_refrigerator")
+  hasTelevision           Boolean  @default(false) @map("has_television")
+  hasPersonalVehicle      Boolean  @default(false) @map("has_personal_vehicle")
+  hasComputer             Boolean  @default(false) @map("has_computer")
+  hasInternet             Boolean  @default(false) @map("has_internet")
+  socioNotes              String   @default("") @map("socio_notes")
+
+  medicalHistory          MedicalHistory?
+  consultations           Consultation[]
+  prescriptions           Prescription[]
+  medicineIssues          MedicineIssue[]
+  assistanceRequests      AssistanceRequest[]
+  fileRequests            FileRequest[]
+  labOrders               LabOrder[]
+
+  @@map("patients")
+}
+
+model MedicalHistory {
+  patientId              String   @id @map("patient_id")
+  chronicConditions      String   @default("[]") @map("chronic_conditions")
+  lifestyleFactors       String   @default("[]") @map("lifestyle_factors")
+  familyHistory          String   @default("[]") @map("family_history")
+  allergies              String   @default("None")
+  existingMedications    String   @default("None") @map("existing_medications")
+  priorCardiacProcedures String   @default("[]") @map("prior_cardiac_procedures")
+  lastUpdated            DateTime @default(now()) @map("last_updated")
+  updatedBy              String   @default("") @map("updated_by")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("medical_histories")
+}
+
+model Consultation {
+  id                     String   @id @default(cuid())
+  patientId              String   @map("patient_id")
+  visitDate              DateTime @default(now()) @map("visit_date")
+  bpSystolic             Int      @default(120) @map("bp_systolic")
+  bpDiastolic            Int      @default(80) @map("bp_diastolic")
+  pulse                  Int      @default(72)
+  weight                 Float    @default(70)
+  height                 Float    @default(170)
+  bmi                    Float    @default(24.2)
+  spo2                   Int      @default(98)
+  chiefComplaint         String   @default("") @map("chief_complaint")
+  symptoms               String   @default("")
+  examinationFindings    String   @default("") @map("examination_findings")
+  diagnosis              String   @default("")
+  doctorNotes            String   @default("") @map("doctor_notes")
+  followUpDate           String   @default("") @map("follow_up_date")
+  followUpInstructions   String   @default("") @map("follow_up_instructions")
+  doctorName             String   @default("") @map("doctor_name")
+  investigations         String   @default("")
+  procedures             String   @default("")
+  referrals              String   @default("")
+  requirements           String   @default("")
+  foundationReferral     Boolean  @default(false) @map("foundation_referral")
+
+  patient     Patient        @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  prescriptions Prescription[]
+
+  @@map("consultations")
+}
+
+model Prescription {
+  id                       String   @id @default(cuid())
+  consultationId           String?  @map("consultation_id")
+  patientId                String   @map("patient_id")
+  date                     DateTime @default(now())
+  lifestyleRecommendations String   @default("") @map("lifestyle_recommendations")
+  doctorName               String   @default("") @map("doctor_name")
+  status                   String   @default("Pending")
+
+  patient          Patient              @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  consultation     Consultation?        @relation(fields: [consultationId], references: [id])
+  items            PrescriptionItem[]
+  medicineIssues   MedicineIssue[]
+
+  @@map("prescriptions")
+}
+
+model PrescriptionItem {
+  id              Int      @id @default(autoincrement())
+  prescriptionId  String   @map("prescription_id")
+  medicineId      String   @default("") @map("medicine_id")
+  medicineName    String   @default("") @map("medicine_name")
+  strength        String   @default("")
+  dosage          String   @default("")
+  frequency       String   @default("")
+  duration        String   @default("")
+  instructions    String   @default("")
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+
+  @@map("prescription_items")
+}
+
+model Inventory {
+  id                  String   @id @default(cuid())
+  medicineName        String   @map("medicine_name")
+  category            String   @default("")
+  supplier            String   @default("")
+  batchNumber         String   @default("") @map("batch_number")
+  purchaseDate        String   @default("") @map("purchase_date")
+  expiryDate          String   @default("") @map("expiry_date")
+  quantityAvailable   Int      @default(0) @map("quantity_available")
+  minimumStockLevel   Int      @default(50) @map("minimum_stock_level")
+  unitPrice           Float    @default(0) @map("unit_price")
+
+  @@map("inventory")
+}
+
+model MedicineIssue {
+  id               String   @id @default(cuid())
+  prescriptionId   String?  @map("prescription_id")
+  patientId        String?  @map("patient_id")
+  issueDate        DateTime @default(now()) @map("issue_date")
+  issuedBy         String   @default("") @map("issued_by")
+  paymentStatus    String   @default("Fully Paid") @map("payment_status")
+  sponsorshipId    String?  @map("sponsorship_id")
+
+  patient    Patient?           @relation(fields: [patientId], references: [id])
+  prescription Prescription?    @relation(fields: [prescriptionId], references: [id])
+  items      MedicineIssueItem[]
+
+  @@map("medicine_issues")
+}
+
+model MedicineIssueItem {
+  id              Int    @id @default(autoincrement())
+  issueId         String @map("issue_id")
+  medicineId      String @default("") @map("medicine_id")
+  medicineName    String @default("") @map("medicine_name")
+  batchNumber     String @default("") @map("batch_number")
+  quantityIssued  Int    @default(0) @map("quantity_issued")
+
+  medicineIssue MedicineIssue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@map("medicine_issue_items")
+}
+
+model AssistanceRequest {
+  id                     String   @id @default(cuid())
+  patientId              String   @map("patient_id")
+  patientName            String   @default("") @map("patient_name")
+  type                   String   @default("")
+  estimatedCost          Float    @default(0) @map("estimated_cost")
+  patientContribution    Float    @default(0) @map("patient_contribution")
+  foundationContribution Float    @default(0) @map("foundation_contribution")
+  status                 String   @default("Pending")
+  justification          String   @default("")
+  remarks                String   @default("")
+  requestedBy            String   @default("") @map("requested_by")
+  requestDate            DateTime @default(now()) @map("request_date")
+  approvedBy             String?  @map("approved_by")
+  approvalDate           DateTime? @map("approval_date")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("assistance_requests")
+}
+
+model FileRequest {
+  id              String    @id @default(cuid())
+  patientId       String?   @map("patient_id")
+  patientName     String    @default("") @map("patient_name")
+  requestedBy     String    @default("") @map("requested_by")
+  purpose         String    @default("")
+  urgency         String    @default("Medium")
+  status          String    @default("Pending")
+  requestDate     DateTime  @default(now()) @map("request_date")
+  remarks         String    @default("")
+  fulfilledBy     String?   @map("fulfilled_by")
+  fulfillmentDate DateTime? @map("fulfillment_date")
+
+  patient Patient? @relation(fields: [patientId], references: [id])
+
+  @@map("file_requests")
+}
+
+model DonorPayment {
+  id                String    @id @default(cuid())
+  donorName         String    @map("donor_name")
+  email             String    @default("")
+  phone             String    @default("")
+  amount            Float
+  paymentDate       DateTime  @default(now()) @map("payment_date")
+  paymentMethod     String    @default("Bank Transfer") @map("payment_method")
+  projectSponsorship String  @default("General Cardiac Fund") @map("project_sponsorship")
+  receiptNumber     String    @default("") @map("receipt_number")
+  notes             String    @default("")
+  transactionId     String    @default("") @map("transaction_id")
+  paymentStatus     String    @default("Pending") @map("payment_status")
+  verifiedBy        String?   @map("verified_by")
+  verificationDate  DateTime? @map("verification_date")
+
+  @@map("donor_payments")
+}
+
+model FoundationAccount {
+  id            String  @id @default(cuid())
+  type          String
+  bankName      String  @default("") @map("bank_name")
+  accountTitle  String  @default("") @map("account_title")
+  accountNumber String  @default("") @map("account_number")
+  iban          String  @default("")
+  branchCode    String  @default("") @map("branch_code")
+  phoneNumber   String  @default("") @map("phone_number")
+  isActive      Boolean @default(true) @map("is_active")
+  displayOrder  Int     @default(0) @map("display_order")
+
+  @@map("foundation_accounts")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  timestamp  DateTime @default(now())
+  userName   String   @default("") @map("user_name")
+  action     String   @default("")
+  entityType String   @default("") @map("entity_type")
+  entityId   String   @default("") @map("entity_id")
+  details    String   @default("")
+
+  @@map("audit_logs")
+}
+
+model LabTest {
+  id          String  @id @default(cuid())
+  testName    String  @map("test_name")
+  category    String  @default("General")
+  description String  @default("")
+  normalRange String  @default("") @map("normal_range")
+  unit        String  @default("")
+  cost        Float   @default(0)
+  isActive    Boolean @default(true) @map("is_active")
+
+  @@map("lab_tests")
+}
+
+model LabOrder {
+  id              String   @id @default(cuid())
+  patientId       String   @map("patient_id")
+  patientName     String   @default("") @map("patient_name")
+  consultationId  String   @default("") @map("consultation_id")
+  doctorName      String   @default("") @map("doctor_name")
+  status          String   @default("Pending")
+  priority        String   @default("Routine")
+  orderDate       DateTime @default(now()) @map("order_date")
+  notes           String   @default("")
+
+  patient Patient          @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  items   LabOrderItem[]
+
+  @@map("lab_orders")
+}
+
+model LabOrderItem {
+  id           Int      @id @default(autoincrement())
+  orderId      String   @map("order_id")
+  testId       String   @map("test_id")
+  testName     String   @default("") @map("test_name")
+  result       String   @default("")
+  resultValue  String   @default("") @map("result_value")
+  unit         String   @default("")
+  normalRange  String   @default("") @map("normal_range")
+  status       String   @default("Pending")
+  completedDate DateTime? @map("completed_date")
+  technician   String   @default("")
+
+  labOrder LabOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("lab_order_items")
+}
