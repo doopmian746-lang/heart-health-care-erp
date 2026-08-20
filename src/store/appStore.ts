@@ -105,16 +105,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       const inventory: InventoryItem[] = resInventory.ok ? await resInventory.json() : [];
       const assistance: FoundationAssistance[] = resAssistance.ok ? await resAssistance.json() : [];
 
-      const detailResults = await Promise.all(
-        patients.slice(0, 50).map(async (pat) => {
-          try {
-            const detailRes = await fetch(`${API_BASE}/patients/${pat.id}`, { headers });
-            if (detailRes.ok) return (await detailRes.json()).consultations;
-          } catch { /* skip */ }
-          return [];
-        })
-      );
-      const consultations: Consultation[] = detailResults.flat();
+      const resConsultations = await fetch(`${API_BASE}/consultations`, { headers });
+      const consultations: Consultation[] = resConsultations.ok ? await resConsultations.json() : [];
 
       set({
         patients,
