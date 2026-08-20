@@ -12,6 +12,6 @@ data/*.db
 tmp/
 *.tsbuildinfo
 .vercel/
-.railway/
+.vercel
 *.dmg
 .next/
