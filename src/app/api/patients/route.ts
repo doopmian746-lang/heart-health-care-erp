@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     const id = generatePatientId(1000 + nextNum);
     const patientCode = generatePatientCode(nextNum);
 
-    const se = data.socioEconomic || {};
+    const se: Record<string, any> = data.socioEconomic || {};
     const patient = await prisma.patient.create({
       data: {
         id,

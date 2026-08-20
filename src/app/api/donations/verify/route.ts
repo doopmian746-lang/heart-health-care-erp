@@ -1,4 +1,4 @@
-import { NextResponse, redirect } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateAuditId } from "@/lib/id-generator";
 

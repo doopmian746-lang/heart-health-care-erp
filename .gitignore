@@ -14,4 +14,4 @@ tmp/
 .vercel/
 .railway/
 *.dmg
-.vercel
+.next/
