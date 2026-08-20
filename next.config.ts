@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  outputFileTracingRoot: path.join(__dirname),
+  serverExternalPackages: ["bcryptjs", "@prisma/client"],
 };
 
 export default nextConfig;
