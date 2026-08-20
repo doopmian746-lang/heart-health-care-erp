@@ -164,3 +164,4 @@ docker compose up -d
 ## License
 
 Apache-2.0
+# Force Vercel rebuild
