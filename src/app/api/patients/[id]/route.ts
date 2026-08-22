@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { updatePatientSchema } from "@/lib/validations";
 import { generateAuditId } from "@/lib/id-generator";
+import { transformConsultation } from "@/lib/transformers";
 
 export async function GET(
   request: Request,
@@ -45,7 +46,7 @@ export async function GET(
             priorCardiacProcedures: JSON.parse(medicalHistory.priorCardiacProcedures),
           }
         : null,
-      consultations,
+      consultations: consultations.map(transformConsultation),
       prescriptions: mappedPrescriptions,
       assistanceHistory,
       labOrders,

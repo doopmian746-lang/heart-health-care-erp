@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth, requireRole } from "@/lib/auth";
 import { createConsultationSchema } from "@/lib/validations";
 import { generateConsultationId, generateAuditId } from "@/lib/id-generator";
+import { transformConsultation } from "@/lib/transformers";
 
 export async function GET(
   request: Request,
@@ -15,7 +16,7 @@ export async function GET(
       where: { patientId },
       orderBy: { visitDate: "desc" },
     });
-    return NextResponse.json(consultations);
+    return NextResponse.json(consultations.map(transformConsultation));
   } catch (err: any) {
     if (err instanceof NextResponse) return err;
     return NextResponse.json({ error: "Failed to fetch consultations" }, { status: 500 });
@@ -76,7 +77,7 @@ export async function POST(
         details: `Created consultation for ${patient.fullName}`,
       },
     });
-    return NextResponse.json(consultation);
+    return NextResponse.json(transformConsultation(consultation));
   } catch (err: any) {
     if (err instanceof NextResponse) return err;
     return NextResponse.json({ error: "Failed to create consultation" }, { status: 500 });
