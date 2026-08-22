@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { createPatientSchema } from "@/lib/validations";
 import { generatePatientId, generatePatientCode, generateAuditId } from "@/lib/id-generator";
+import { transformPatient } from "@/lib/transformers";
 
 export async function GET(request: Request) {
   try {
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
       });
     }
 
-    return NextResponse.json(patients);
+    return NextResponse.json(patients.map(transformPatient));
   } catch (err: any) {
     if (err instanceof NextResponse) return err;
     return NextResponse.json({ error: "Failed to fetch patients" }, { status: 500 });
@@ -125,7 +126,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(patient);
+    return NextResponse.json(transformPatient(patient));
   } catch (err: any) {
     if (err instanceof NextResponse) return err;
     console.error("Create patient error:", err);

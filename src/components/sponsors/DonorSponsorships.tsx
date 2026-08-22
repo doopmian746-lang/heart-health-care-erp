@@ -56,7 +56,7 @@ export default function DonorSponsorships() {
   );
 
   const totalAmount = payments.reduce((s, p) => s + p.amount, 0);
-  const verifiedAmount = payments.filter(p => (p as any).payment_status === 'Verified').reduce((s, p) => s + p.amount, 0);
+  const verifiedAmount = payments.filter(p => p.paymentStatus === 'Verified').reduce((s, p) => s + p.amount, 0);
 
   return (
     <div className="space-y-4">

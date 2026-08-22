@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { transformConsultation } from "@/lib/transformers";
 
 export async function GET(request: Request) {
   try {
@@ -43,7 +44,7 @@ export async function GET(request: Request) {
       lowStockMedicines: lowStockMedicines.length,
       totalFundsGranted,
       monthlyRegistrations,
-      recentConsultations: consultations.slice(0, 5),
+      recentConsultations: consultations.slice(0, 5).map(transformConsultation),
       pendingRequests: pendingAssistance.slice(0, 5),
       lab: labStats,
     });

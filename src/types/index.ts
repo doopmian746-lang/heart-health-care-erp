@@ -200,6 +200,10 @@ export interface DonorPayment {
   projectSponsorship?: string;
   receiptNumber: string;
   notes?: string;
+  transactionId?: string;
+  paymentStatus?: string;
+  verifiedBy?: string;
+  verificationDate?: string;
 }
 
 export interface AuditLog {

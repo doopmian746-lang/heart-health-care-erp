@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { updatePatientSchema } from "@/lib/validations";
 import { generateAuditId } from "@/lib/id-generator";
-import { transformConsultation } from "@/lib/transformers";
+import { transformPatient, transformConsultation } from "@/lib/transformers";
 
 export async function GET(
   request: Request,
@@ -36,7 +36,7 @@ export async function GET(
     }));
 
     return NextResponse.json({
-      patient,
+      patient: transformPatient(patient),
       medicalHistory: medicalHistory
         ? {
             ...medicalHistory,
@@ -126,7 +126,7 @@ export async function PATCH(
         details: `Updated patient record for ${existing.fullName}`,
       },
     });
-    return NextResponse.json(updated);
+    return NextResponse.json(transformPatient(updated));
   } catch (err: any) {
     if (err instanceof NextResponse) return err;
     return NextResponse.json({ error: "Failed to update patient" }, { status: 500 });
